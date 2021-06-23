@@ -1,0 +1,248 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: NickAc <32451103+NickAcPT@users.noreply.github.com>
+Date: Wed, 23 Jun 2021 12:34:48 +0100
+Subject: [PATCH] World-bound events
+
+
+diff --git a/src/main/java/org/bukkit/event/WorldProvider.java b/src/main/java/org/bukkit/event/WorldProvider.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..bcce07f431a8191690a004d1e241be1a7bf81374
+--- /dev/null
++++ b/src/main/java/org/bukkit/event/WorldProvider.java
+@@ -0,0 +1,8 @@
++package org.bukkit.event;
++
++import org.bukkit.World;
++import org.jetbrains.annotations.NotNull;
++
++public interface WorldProvider {
++    @NotNull World getWorld();
++}
+\ No newline at end of file
+diff --git a/src/main/java/org/bukkit/event/block/BlockEvent.java b/src/main/java/org/bukkit/event/block/BlockEvent.java
+index 62a4d13453e5430020933471efa938ceb689baaa..2d6519cce2bf62aa634e98b879c3a4133b31d6b2 100644
+--- a/src/main/java/org/bukkit/event/block/BlockEvent.java
++++ b/src/main/java/org/bukkit/event/block/BlockEvent.java
+@@ -1,13 +1,15 @@
+ package org.bukkit.event.block;
+ 
++import org.bukkit.World;
+ import org.bukkit.block.Block;
+ import org.bukkit.event.Event;
++import org.bukkit.event.WorldProvider;
+ import org.jetbrains.annotations.NotNull;
+ 
+ /**
+  * Represents a block related event.
+  */
+-public abstract class BlockEvent extends Event {
++public abstract class BlockEvent extends Event implements WorldProvider { // Deepslate - World-bound events
+     protected Block block;
+ 
+     public BlockEvent(@NotNull final Block theBlock) {
+@@ -23,4 +25,12 @@ public abstract class BlockEvent extends Event {
+     public final Block getBlock() {
+         return block;
+     }
++
++    // Deepslate start - World-bound events
++    @NotNull
++    @Override
++    public World getWorld() {
++        return block.getWorld();
++    }
++    // Deepslate end - World-bound events
+ }
+diff --git a/src/main/java/org/bukkit/event/entity/EntityEvent.java b/src/main/java/org/bukkit/event/entity/EntityEvent.java
+index e3a9e32933fe84644f7458d2e0b8b09d3eacb21c..0e1f84b74f91ef194a49849887bae0ff3704f4e3 100644
+--- a/src/main/java/org/bukkit/event/entity/EntityEvent.java
++++ b/src/main/java/org/bukkit/event/entity/EntityEvent.java
+@@ -1,14 +1,16 @@
+ package org.bukkit.event.entity;
+ 
++import org.bukkit.World;
+ import org.bukkit.entity.Entity;
+ import org.bukkit.entity.EntityType;
+ import org.bukkit.event.Event;
++import org.bukkit.event.WorldProvider;
+ import org.jetbrains.annotations.NotNull;
+ 
+ /**
+  * Represents an Entity-related event
+  */
+-public abstract class EntityEvent extends Event {
++public abstract class EntityEvent extends Event implements WorldProvider { // Deepslate - World-bound events
+     protected Entity entity;
+ 
+     public EntityEvent(@NotNull final Entity what) {
+@@ -34,4 +36,12 @@ public abstract class EntityEvent extends Event {
+     public EntityType getEntityType() {
+         return entity.getType();
+     }
++
++    // Deepslate start - World-bound events
++    @NotNull
++    @Override
++    public World getWorld() {
++        return entity.getWorld();
++    }
++    // Deepslate end - World-bound events
+ }
+diff --git a/src/main/java/org/bukkit/event/player/PlayerEvent.java b/src/main/java/org/bukkit/event/player/PlayerEvent.java
+index f6d3b817de3001f04ea4554c7c39a1290af3fd6d..97898acc11bf23d4a94a2c7d9db6881e0e57353b 100644
+--- a/src/main/java/org/bukkit/event/player/PlayerEvent.java
++++ b/src/main/java/org/bukkit/event/player/PlayerEvent.java
+@@ -1,13 +1,15 @@
+ package org.bukkit.event.player;
+ 
++import org.bukkit.World;
+ import org.bukkit.entity.Player;
+ import org.bukkit.event.Event;
++import org.bukkit.event.WorldProvider;
+ import org.jetbrains.annotations.NotNull;
+ 
+ /**
+  * Represents a player related event
+  */
+-public abstract class PlayerEvent extends Event {
++public abstract class PlayerEvent extends Event implements WorldProvider { // Deepslate - World-bound events
+     protected Player player;
+ 
+     public PlayerEvent(@NotNull final Player who) {
+@@ -29,4 +31,12 @@ public abstract class PlayerEvent extends Event {
+     public final Player getPlayer() {
+         return player;
+     }
++
++    // Deepslate start - World-bound events
++    @NotNull
++    @Override
++    public World getWorld() {
++        return player.getWorld();
++    }
++    // Deepslate end - World-bound events
+ }
+diff --git a/src/main/java/org/bukkit/event/world/WorldEvent.java b/src/main/java/org/bukkit/event/world/WorldEvent.java
+index 1fa083d53dce161ef9e9f19407f230c94b2d7d15..2037bac731f27750f3be8bf246885823c5a63bb5 100644
+--- a/src/main/java/org/bukkit/event/world/WorldEvent.java
++++ b/src/main/java/org/bukkit/event/world/WorldEvent.java
+@@ -2,12 +2,13 @@ package org.bukkit.event.world;
+ 
+ import org.bukkit.World;
+ import org.bukkit.event.Event;
++import org.bukkit.event.WorldProvider;
+ import org.jetbrains.annotations.NotNull;
+ 
+ /**
+  * Represents events within a world
+  */
+-public abstract class WorldEvent extends Event {
++public abstract class WorldEvent extends Event implements WorldProvider { // Deepslate - World-bound events
+     private final World world;
+ 
+     // Purpur start
+diff --git a/src/main/java/org/bukkit/plugin/PluginManager.java b/src/main/java/org/bukkit/plugin/PluginManager.java
+index 86cc5025ad98f7a752c51713b7cd6a39d5136ecc..53560e28d3bfe5604ffa170ef53c178fff8b94a9 100644
+--- a/src/main/java/org/bukkit/plugin/PluginManager.java
++++ b/src/main/java/org/bukkit/plugin/PluginManager.java
+@@ -2,6 +2,7 @@ package org.bukkit.plugin;
+ 
+ import java.io.File;
+ import java.util.Set;
++import org.bukkit.World;
+ import org.bukkit.event.Event;
+ import org.bukkit.event.EventPriority;
+ import org.bukkit.event.Listener;
+@@ -142,6 +143,20 @@ public interface PluginManager {
+      */
+     public void registerEvent(@NotNull Class<? extends Event> event, @NotNull Listener listener, @NotNull EventPriority priority, @NotNull EventExecutor executor, @NotNull Plugin plugin, boolean ignoreCancelled);
+ 
++    /**
++     * Registers the specified world-bound executor to the given event class
++     *
++     * @param event Event type to register
++     * @param listener Listener to register
++     * @param priority Priority to register this event at
++     * @param executor EventExecutor to register
++     * @param plugin Plugin to register
++     * @param ignoreCancelled Whether to pass cancelled events or not
++     * @param world World to bind this listener to
++     */
++    public void registerEvent(@NotNull Class<? extends Event> event, @NotNull Listener listener, @NotNull EventPriority priority, @NotNull EventExecutor executor, @NotNull Plugin plugin, boolean ignoreCancelled, @Nullable World world);
++
++
+     /**
+      * Enables the specified plugin
+      * <p>
+diff --git a/src/main/java/org/bukkit/plugin/SimplePluginManager.java b/src/main/java/org/bukkit/plugin/SimplePluginManager.java
+index 0e25119564dfa9cb12f3c5dc5f653d7f2c147a9d..5072f3eb6ef3c64d72fa7174357000a1b40ff025 100644
+--- a/src/main/java/org/bukkit/plugin/SimplePluginManager.java
++++ b/src/main/java/org/bukkit/plugin/SimplePluginManager.java
+@@ -678,6 +678,13 @@ public final class SimplePluginManager implements PluginManager {
+      */
+     @Override
+     public void registerEvent(@NotNull Class<? extends Event> event, @NotNull Listener listener, @NotNull EventPriority priority, @NotNull EventExecutor executor, @NotNull Plugin plugin, boolean ignoreCancelled) {
++    // Deepslate start - World-bound event listeners
++        registerEvent(event, listener, priority, executor, plugin, ignoreCancelled, null);
++    }
++
++    @Override
++    public void registerEvent(@NotNull Class<? extends Event> event, @NotNull Listener listener, @NotNull EventPriority priority, @NotNull EventExecutor executor, @NotNull Plugin plugin, boolean ignoreCancelled, @Nullable World world) {
++    // Deepslate end - World-bound event listeners
+         Validate.notNull(listener, "Listener cannot be null");
+         Validate.notNull(priority, "Priority cannot be null");
+         Validate.notNull(executor, "Executor cannot be null");
+@@ -691,7 +698,13 @@ public final class SimplePluginManager implements PluginManager {
+         if (false) { // Spigot - RL handles useTimings check now // Paper
+             getEventListeners(event).register(new TimedRegisteredListener(listener, executor, priority, plugin, ignoreCancelled));
+         } else {
+-            getEventListeners(event).register(new RegisteredListener(listener, executor, priority, plugin, ignoreCancelled));
++        // Deepslate start - World-bound event listeners
++            if (world != null) {
++                getEventListeners(event).register(new WorldBoundRegisteredListener(listener, executor, priority, plugin, ignoreCancelled, world));
++            } else {
++                getEventListeners(event).register(new RegisteredListener(listener, executor, priority, plugin, ignoreCancelled));
++            }
++        // Deepslate end - World-bound event listeners
+         }
+     }
+ 
+diff --git a/src/main/java/org/bukkit/plugin/WorldBoundRegisteredListener.java b/src/main/java/org/bukkit/plugin/WorldBoundRegisteredListener.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..ecba25f17e0529220c35fb67aa90fb1c315b46a1
+--- /dev/null
++++ b/src/main/java/org/bukkit/plugin/WorldBoundRegisteredListener.java
+@@ -0,0 +1,32 @@
++package org.bukkit.plugin;
++
++import java.util.UUID;
++import org.bukkit.World;
++import org.bukkit.event.Event;
++import org.bukkit.event.EventException;
++import org.bukkit.event.EventPriority;
++import org.bukkit.event.Listener;
++import org.bukkit.event.WorldProvider;
++import org.jetbrains.annotations.NotNull;
++
++public class WorldBoundRegisteredListener extends RegisteredListener {
++    private final UUID worldId;
++
++    public WorldBoundRegisteredListener(@NotNull Listener listener, @NotNull EventExecutor executor, @NotNull EventPriority priority, @NotNull Plugin plugin, boolean ignoreCancelled, @NotNull World world) {
++        super(listener, executor, priority, plugin, ignoreCancelled);
++        worldId = world.getUID();
++    }
++
++    @NotNull
++    public UUID getWorldId() {
++        return worldId;
++    }
++
++    @Override
++    public void callEvent(@NotNull Event event) throws EventException {
++        if (event instanceof WorldProvider && ((WorldProvider)event).getWorld().getUID() != getWorldId()) {
++            return;
++        }
++        super.callEvent(event);
++    }
++}
+\ No newline at end of file
