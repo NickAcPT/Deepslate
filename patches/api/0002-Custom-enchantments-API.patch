@@ -1,0 +1,131 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: NickAc <32451103+NickAcPT@users.noreply.github.com>
+Date: Fri, 25 Jun 2021 09:27:44 +0100
+Subject: [PATCH] Custom enchantments API
+
+
+diff --git a/src/main/java/io/github/nickacpt/deepslate/enchantments/CustomEnchantment.java b/src/main/java/io/github/nickacpt/deepslate/enchantments/CustomEnchantment.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..a21882c6c74bf83177c6c473f9424b43bcf1a797
+--- /dev/null
++++ b/src/main/java/io/github/nickacpt/deepslate/enchantments/CustomEnchantment.java
+@@ -0,0 +1,68 @@
++package io.github.nickacpt.deepslate.enchantments;
++
++import java.util.EnumSet;
++import java.util.Locale;
++import java.util.Set;
++import org.bukkit.Keyed;
++import org.bukkit.NamespacedKey;
++import org.bukkit.enchantments.Enchantment;
++import org.bukkit.entity.EntityCategory;
++import org.bukkit.inventory.EquipmentSlot;
++import org.bukkit.inventory.ItemStack;
++import org.jetbrains.annotations.NotNull;
++
++/**
++ * Plugin provided custom enchantment
++ */
++public abstract class CustomEnchantment extends Enchantment implements Keyed {
++
++    protected CustomEnchantment(NamespacedKey key) {
++        super(key);
++    }
++
++    @Override
++    public @NotNull String getName() {
++        return "CUSTOM_" + getKey().getNamespace().toUpperCase(Locale.ROOT) + "_" + getKey().getKey().toUpperCase(Locale.ROOT);
++    }
++
++    @Override
++    public boolean isCursed() {
++        return false;
++    }
++
++    @Override
++    public boolean isTreasure() {
++        return false;
++    }
++
++    @Override
++    public boolean conflictsWith(@NotNull Enchantment other) {
++        return false;
++    }
++
++    @Override
++    public float getDamageIncrease(int level, @NotNull EntityCategory entityCategory) {
++        return 0;
++    }
++
++    @Override
++    public boolean canEnchantItem(@NotNull ItemStack item) {
++        return true;
++    }
++
++    @Override
++    public boolean isDiscoverable() {
++        return true;
++    }
++    @Override
++    public boolean isTradeable() {
++        return true;
++    }
++
++    @NotNull
++    @Override
++    public Set<EquipmentSlot> getActiveSlots() {
++        return EnumSet.allOf(EquipmentSlot.class);
++    }
++
++}
+\ No newline at end of file
+diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index 194261bf20bb727d207a2429fa59abf0acf61b19..fdb582b855a1f42fa6eacdd1f202124b575980c7 100644
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -1983,4 +1983,14 @@ public final class Bukkit {
+         return server.isLagging();
+     }
+     // Purpur end
++
++    // Deepslate start
++    /**
++     * Register a plugin provided custom enchantment
++     * @param enchantment The enchantment to register
++     */
++    public static void registerEnchantment(@NotNull io.github.nickacpt.deepslate.enchantments.CustomEnchantment enchantment) {
++        server.registerEnchantment(enchantment);
++    }
++    // Deepslate end
+ }
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 8d3c9a355bea2b217f69f6eb70e0962a370e09b8..9ba85b260bad5c72525d6d42a57c885f3b8eff95 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -1747,4 +1747,13 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
+      */
+     boolean isLagging();
+     // Purpur end
++
++    // Deepslate start
++
++    /**
++     * Register a plugin provided custom enchantment
++     * @param enchantment The enchantment to register
++     */
++    void registerEnchantment(@NotNull io.github.nickacpt.deepslate.enchantments.CustomEnchantment enchantment);
++    // Deepslate end
+ }
+diff --git a/src/main/java/org/bukkit/enchantments/Enchantment.java b/src/main/java/org/bukkit/enchantments/Enchantment.java
+index 799813410f40589ba1d7d530a47d87f609764705..e44f8559dda77b4f59ec940b3217a27f18bf2db9 100644
+--- a/src/main/java/org/bukkit/enchantments/Enchantment.java
++++ b/src/main/java/org/bukkit/enchantments/Enchantment.java
+@@ -383,7 +383,7 @@ public abstract class Enchantment implements Keyed {
+     public static void registerEnchantment(@NotNull Enchantment enchantment) {
+         if (byKey.containsKey(enchantment.key) || byName.containsKey(enchantment.getName())) {
+             throw new IllegalArgumentException("Cannot set already-set enchantment");
+-        } else if (!isAcceptingRegistrations()) {
++        } else if (!(enchantment instanceof io.github.nickacpt.deepslate.enchantments.CustomEnchantment) && !isAcceptingRegistrations()) { // Deepslate - Always accept registration of custom enchantments
+             throw new IllegalStateException("No longer accepting new enchantments (can only be done by the server implementation)");
+         }
+ 

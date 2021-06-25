@@ -1,0 +1,181 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: NickAc <32451103+NickAcPT@users.noreply.github.com>
+Date: Fri, 25 Jun 2021 09:27:43 +0100
+Subject: [PATCH] Custom enchantments API
+
+
+diff --git a/src/main/java/io/github/nickacpt/deepslate/enchantments/CraftCustomEnchantment.java b/src/main/java/io/github/nickacpt/deepslate/enchantments/CraftCustomEnchantment.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..996c03300a2d2177ec1b11e98260292eb075a51e
+--- /dev/null
++++ b/src/main/java/io/github/nickacpt/deepslate/enchantments/CraftCustomEnchantment.java
+@@ -0,0 +1,49 @@
++package io.github.nickacpt.deepslate.enchantments;
++
++import net.minecraft.world.entity.EquipmentSlot;
++import net.minecraft.world.item.enchantment.Enchantment;
++import net.minecraft.world.item.enchantment.EnchantmentCategory;
++import org.bukkit.craftbukkit.CraftEquipmentSlot;
++
++public class CraftCustomEnchantment extends Enchantment {
++
++    public CraftCustomEnchantment(CustomEnchantment enchantment) {
++        super(tobukkitRarity(enchantment.getRarity()), toNMSCategory(enchantment.getItemTarget()), enchantment.getActiveSlots().stream().map(CraftEquipmentSlot::getNMS).toArray(EquipmentSlot[]::new));
++    }
++
++    public static net.minecraft.world.item.enchantment.Enchantment.Rarity tobukkitRarity(io.papermc.paper.enchantments.EnchantmentRarity bukkitRarity) {
++        if (bukkitRarity == io.papermc.paper.enchantments.EnchantmentRarity.COMMON) {
++            return net.minecraft.world.item.enchantment.Enchantment.Rarity.COMMON;
++        } else if (bukkitRarity == io.papermc.paper.enchantments.EnchantmentRarity.UNCOMMON) {
++            return net.minecraft.world.item.enchantment.Enchantment.Rarity.UNCOMMON;
++        } else if (bukkitRarity == io.papermc.paper.enchantments.EnchantmentRarity.RARE) {
++            return net.minecraft.world.item.enchantment.Enchantment.Rarity.RARE;
++        } else if (bukkitRarity == io.papermc.paper.enchantments.EnchantmentRarity.VERY_RARE) {
++            return net.minecraft.world.item.enchantment.Enchantment.Rarity.VERY_RARE;
++        }
++
++        throw new IllegalArgumentException(String.format("Unable to convert %s to a enum value of %s.", bukkitRarity, net.minecraft.world.item.enchantment.Enchantment.Rarity.class));
++    }
++
++    public static net.minecraft.world.item.enchantment.EnchantmentCategory toNMSCategory(org.bukkit.enchantments.EnchantmentTarget bukkitTarget) {
++        return switch (bukkitTarget) {
++            case ALL -> throw new IllegalArgumentException(String.format("Unable to convert %s to a enum value of %s.", bukkitTarget, net.minecraft.world.item.enchantment.Enchantment.Rarity.class));
++            case ARMOR -> EnchantmentCategory.ARMOR;
++            case ARMOR_FEET -> EnchantmentCategory.ARMOR_FEET;
++            case ARMOR_LEGS -> EnchantmentCategory.ARMOR_LEGS;
++            case ARMOR_TORSO -> EnchantmentCategory.ARMOR_CHEST;
++            case ARMOR_HEAD -> EnchantmentCategory.ARMOR_HEAD;
++            case WEAPON -> EnchantmentCategory.WEAPON;
++            case TOOL -> EnchantmentCategory.TOOL;
++            case BOW -> EnchantmentCategory.BOW;
++            case FISHING_ROD -> EnchantmentCategory.FISHING_ROD;
++            case BREAKABLE -> EnchantmentCategory.BREAKABLE;
++            case WEARABLE -> EnchantmentCategory.WEARABLE;
++            case TRIDENT -> EnchantmentCategory.TRIDENT;
++            case CROSSBOW -> EnchantmentCategory.CROSSBOW;
++            case VANISHABLE -> EnchantmentCategory.VANISHABLE;
++            case BOW_AND_CROSSBOW -> EnchantmentCategory.BOW_AND_CROSSBOW;
++        };
++    }
++
++}
+diff --git a/src/main/java/io/github/nickacpt/deepslate/enchantments/TestCustomEnchantment.java b/src/main/java/io/github/nickacpt/deepslate/enchantments/TestCustomEnchantment.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..e669f2f5268922ab52c821f0a85e2edbfa8481ba
+--- /dev/null
++++ b/src/main/java/io/github/nickacpt/deepslate/enchantments/TestCustomEnchantment.java
+@@ -0,0 +1,40 @@
++package io.github.nickacpt.deepslate.enchantments;
++
++import io.papermc.paper.enchantments.EnchantmentRarity;
++import net.kyori.adventure.text.Component;
++import org.bukkit.NamespacedKey;
++import org.bukkit.enchantments.EnchantmentTarget;
++import org.jetbrains.annotations.NotNull;
++
++public class TestCustomEnchantment extends CustomEnchantment {
++    public TestCustomEnchantment() {
++        super(new NamespacedKey("deepslate", "custom_enchantment"));
++    }
++
++    @Override
++    public int getMaxLevel() {
++        return 5;
++    }
++
++    @Override
++    public int getStartLevel() {
++        return 1;
++    }
++
++    @Override
++    public @NotNull EnchantmentTarget getItemTarget() {
++        return EnchantmentTarget.TOOL;
++    }
++
++    @NotNull
++    @Override
++    public Component displayName(int level) {
++        return Component.text("Custom enchantment");
++    }
++
++    @NotNull
++    @Override
++    public EnchantmentRarity getRarity() {
++        return EnchantmentRarity.COMMON;
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/commands/EnchantCommand.java b/src/main/java/net/minecraft/server/commands/EnchantCommand.java
+index a3ac6bebcef7b1e1f9c3ebe525656a15e13f9be8..2d1be1a1f37a0809368458522d34e3e01ad2e711 100644
+--- a/src/main/java/net/minecraft/server/commands/EnchantCommand.java
++++ b/src/main/java/net/minecraft/server/commands/EnchantCommand.java
+@@ -19,6 +19,11 @@ import net.minecraft.world.item.enchantment.Enchantment;
+ import net.minecraft.world.item.enchantment.EnchantmentHelper;
+ 
+ public class EnchantCommand {
++    // Deepslate start
++    private static final com.mojang.brigadier.suggestion.SuggestionProvider<CommandSourceStack> SUGGEST_ENCHANTMENTS = (context, builder) -> {
++        return net.minecraft.commands.SharedSuggestionProvider.suggestResource(net.minecraft.core.Registry.ENCHANTMENT.keySet(), builder);
++    };
++    // Deepslate end
+     private static final DynamicCommandExceptionType ERROR_NOT_LIVING_ENTITY = new DynamicCommandExceptionType((entityName) -> {
+         return new TranslatableComponent("commands.enchant.failed.entity", entityName);
+     });
+@@ -36,7 +41,7 @@ public class EnchantCommand {
+     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+         dispatcher.register(Commands.literal("enchant").requires((source) -> {
+             return source.hasPermission(2);
+-        }).then(Commands.argument("targets", EntityArgument.entities()).then(Commands.argument("enchantment", ItemEnchantmentArgument.enchantment()).executes((context) -> {
++        }).then(Commands.argument("targets", EntityArgument.entities()).then(Commands.argument("enchantment", ItemEnchantmentArgument.enchantment()).suggests(SUGGEST_ENCHANTMENTS).executes((context) -> { // Deepslate - Make enchantment suggestions server side
+             return enchant(context.getSource(), EntityArgument.getEntities(context, "targets"), ItemEnchantmentArgument.getEnchantment(context, "enchantment"), 1);
+         }).then(Commands.argument("level", IntegerArgumentType.integer(0)).executes((context) -> {
+             return enchant(context.getSource(), EntityArgument.getEntities(context, "targets"), ItemEnchantmentArgument.getEnchantment(context, "enchantment"), IntegerArgumentType.getInteger(context, "level"));
+diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
+index 4d664df40745d1a9fba63245bccc1f6ebfc73f29..263a917299e58bb8e2f98a4b7f8df6ee3303987f 100644
+--- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
+@@ -347,6 +347,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
+             }
+ 
+             net.pl3x.purpur.task.TPSBarTask.start(); // Purpur
++            org.bukkit.Bukkit.registerEnchantment(new io.github.nickacpt.deepslate.enchantments.TestCustomEnchantment());
+ 
+             return true;
+         }
+diff --git a/src/main/java/net/minecraft/world/item/enchantment/EnchantmentCategory.java b/src/main/java/net/minecraft/world/item/enchantment/EnchantmentCategory.java
+index d6417c1e77ac8823e18a179dc9f61757a1f339ad..12271716320ac80c56a4461a123d1d1e64029556 100644
+--- a/src/main/java/net/minecraft/world/item/enchantment/EnchantmentCategory.java
++++ b/src/main/java/net/minecraft/world/item/enchantment/EnchantmentCategory.java
+@@ -105,6 +105,14 @@ public enum EnchantmentCategory {
+             return item instanceof BowItem || item instanceof CrossbowItem;
+         }
+     // Purpur end
++    // Deepslate start
++    },
++    TOOL {
++        @Override
++        public boolean canEnchant(Item item) {
++            return item instanceof net.minecraft.world.item.ShovelItem || item instanceof net.minecraft.world.item.PickaxeItem || item instanceof net.minecraft.world.item.AxeItem || item instanceof net.minecraft.world.item.HoeItem;
++        }
++    // Deepslate end
+     };
+ 
+     public abstract boolean canEnchant(Item item);
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 9a884e953b46b4b57cebed39e8d6a4acaae61cd0..67195d454752d9cee220f62e70fa5c738d89afe2 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -2546,4 +2546,13 @@ public final class CraftServer implements Server {
+         return getServer().lagging;
+     }
+     // Purpur end
++
++    // Deepslate start
++    public void registerEnchantment(io.github.nickacpt.deepslate.enchantments.CustomEnchantment enchantment) {
++        io.github.nickacpt.deepslate.enchantments.CraftCustomEnchantment nmsEnchantment = new io.github.nickacpt.deepslate.enchantments.CraftCustomEnchantment(enchantment);
++
++        Registry.register(Registry.ENCHANTMENT, CraftNamespacedKey.toMinecraft(enchantment.getKey()), nmsEnchantment);
++        org.bukkit.enchantments.Enchantment.registerEnchantment(enchantment);
++    }
++    // Deepslate end
+ }
