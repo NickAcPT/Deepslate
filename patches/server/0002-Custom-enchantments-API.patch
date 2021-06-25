@@ -255,6 +255,21 @@ index 66d2559e5bd8630c6cbca0fe8d0eb1f756c388df..c96347fd43f4aa70e9de693d4d3d410e
  
              return true;
          }
+diff --git a/src/main/java/net/minecraft/server/level/ServerPlayerGameMode.java b/src/main/java/net/minecraft/server/level/ServerPlayerGameMode.java
+index a25e4eeb1ce4e18c7cb14e269ad3852715209cb9..c87503bceda9e83562ac5491c503f3b5ff29b3a8 100644
+--- a/src/main/java/net/minecraft/server/level/ServerPlayerGameMode.java
++++ b/src/main/java/net/minecraft/server/level/ServerPlayerGameMode.java
+@@ -400,6 +400,10 @@ public class ServerPlayerGameMode {
+ 
+             this.level.getCraftServer().getPluginManager().callEvent(event);
+ 
++            //Deepslate start
++            net.minecraft.world.item.enchantment.EnchantmentHelper.handleCustomEnchantmentEvent(event, itemstack, player);
++            //Deepslate end
++
+             if (event.isCancelled()) {
+                 if (isSwordNoBreak) {
+                     return false;
 diff --git a/src/main/java/net/minecraft/world/item/ItemStack.java b/src/main/java/net/minecraft/world/item/ItemStack.java
 index 4be9924556e0f447dbe6a53c2d4cb7fb89dac455..fd3b084ac396d342edcbdcec624e35156540b29e 100644
 --- a/src/main/java/net/minecraft/world/item/ItemStack.java
@@ -292,6 +307,30 @@ index d6417c1e77ac8823e18a179dc9f61757a1f339ad..12271716320ac80c56a4461a123d1d1e
      };
  
      public abstract boolean canEnchant(Item item);
+diff --git a/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java b/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java
+index 585b29a214d0306ac2d6a170125270c1bbd7c58d..1954de531d8da0b51f681381a9d1ecb7db4ba852 100644
+--- a/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java
++++ b/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java
+@@ -411,4 +411,19 @@ public class EnchantmentHelper {
+     interface EnchantmentVisitor {
+         void accept(Enchantment enchantment, int level);
+     }
++
++    //Deepslate start
++    public static void handleCustomEnchantmentEvent(org.bukkit.event.Event event, ItemStack itemStack, Player player) {
++        runIterationOnItem((enchantment, level) -> {
++            if (enchantment instanceof io.github.nickacpt.deepslate.enchantments.CraftCustomEnchantment customEnchantment) {
++                io.github.nickacpt.deepslate.enchantments.CustomEnchantment bukkitEnchantment = customEnchantment.getCustomEnchantment();
++                if (!(player.getBukkitEntity() instanceof org.bukkit.entity.Player bukkitPlayer)) return;
++
++                if (event instanceof org.bukkit.event.block.BlockBreakEvent blockBreakEvent) {
++                    bukkitEnchantment.onBlockBreak(blockBreakEvent, bukkitPlayer, itemStack.asBukkitMirror());
++                }
++            }
++        }, itemStack);
++    }
++    //Deepslate end
+ }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 index 78eecb127deaa6c230df784862c8f32d4c835488..361c1233fa50e93c584594e6b10ffdae8513d21a 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java

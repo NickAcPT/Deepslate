@@ -6,10 +6,10 @@ Subject: [PATCH] Custom enchantments API
 
 diff --git a/src/main/java/io/github/nickacpt/deepslate/enchantments/CustomEnchantment.java b/src/main/java/io/github/nickacpt/deepslate/enchantments/CustomEnchantment.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..2d66e77fe278596b13e03f6e473ccdbf8e640423
+index 0000000000000000000000000000000000000000..2cb9753ffb4f7a243d42660a4fd45360a51b37ce
 --- /dev/null
 +++ b/src/main/java/io/github/nickacpt/deepslate/enchantments/CustomEnchantment.java
-@@ -0,0 +1,92 @@
+@@ -0,0 +1,95 @@
 +package io.github.nickacpt.deepslate.enchantments;
 +
 +import java.util.EnumSet;
@@ -21,6 +21,8 @@ index 0000000000000000000000000000000000000000..2d66e77fe278596b13e03f6e473ccdbf
 +import org.bukkit.NamespacedKey;
 +import org.bukkit.enchantments.Enchantment;
 +import org.bukkit.entity.EntityCategory;
++import org.bukkit.entity.Player;
++import org.bukkit.event.block.BlockBreakEvent;
 +import org.bukkit.inventory.EquipmentSlot;
 +import org.bukkit.inventory.ItemStack;
 +import org.jetbrains.annotations.NotNull;
@@ -101,6 +103,7 @@ index 0000000000000000000000000000000000000000..2d66e77fe278596b13e03f6e473ccdbf
 +        return component;
 +    }
 +
++    public void onBlockBreak(@NotNull BlockBreakEvent event, @NotNull Player player, @NotNull ItemStack itemStack) {}
 +}
 \ No newline at end of file
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
