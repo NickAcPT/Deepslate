@@ -6,15 +6,17 @@ Subject: [PATCH] Custom enchantments API
 
 diff --git a/src/main/java/io/github/nickacpt/deepslate/enchantments/CustomEnchantment.java b/src/main/java/io/github/nickacpt/deepslate/enchantments/CustomEnchantment.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..a21882c6c74bf83177c6c473f9424b43bcf1a797
+index 0000000000000000000000000000000000000000..2d66e77fe278596b13e03f6e473ccdbf8e640423
 --- /dev/null
 +++ b/src/main/java/io/github/nickacpt/deepslate/enchantments/CustomEnchantment.java
-@@ -0,0 +1,68 @@
+@@ -0,0 +1,92 @@
 +package io.github.nickacpt.deepslate.enchantments;
 +
 +import java.util.EnumSet;
 +import java.util.Locale;
 +import java.util.Set;
++import net.kyori.adventure.text.Component;
++import net.kyori.adventure.text.format.NamedTextColor;
 +import org.bukkit.Keyed;
 +import org.bukkit.NamespacedKey;
 +import org.bukkit.enchantments.Enchantment;
@@ -66,6 +68,7 @@ index 0000000000000000000000000000000000000000..a21882c6c74bf83177c6c473f9424b43
 +    public boolean isDiscoverable() {
 +        return true;
 +    }
++
 +    @Override
 +    public boolean isTradeable() {
 +        return true;
@@ -75,6 +78,27 @@ index 0000000000000000000000000000000000000000..a21882c6c74bf83177c6c473f9424b43
 +    @Override
 +    public Set<EquipmentSlot> getActiveSlots() {
 +        return EnumSet.allOf(EquipmentSlot.class);
++    }
++
++    @NotNull
++    public abstract Component displayName();
++
++    @NotNull
++    @Override
++    public Component displayName(int level) {
++        Component component = displayName();
++
++        if (level != 1 || this.getMaxLevel() != 1) {
++            component = component.append(Component.space()).append(Component.translatable("enchantment.level." + level));
++        }
++
++        if (this.isCursed()) {
++            component = component.color(NamedTextColor.RED);
++        } else {
++            component = component.color(NamedTextColor.GRAY);
++        }
++
++        return component;
 +    }
 +
 +}
