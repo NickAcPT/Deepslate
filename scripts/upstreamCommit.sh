@@ -7,7 +7,7 @@ function changelog() {
     base=$(git ls-tree HEAD $1  | cut -d' ' -f3 | cut -f1)
     cd $1 && git log --oneline ${base}...HEAD
 }
-purpur=$(changelog .gradle/caches/purpurweight/upstreams/Purpur)
+purpur=$(changelog .gradle/caches/paperweight/upstreams/Purpur)
 
 updated=""
 logsuffix=""
