@@ -6,13 +6,14 @@ Subject: [PATCH] Custom enchantments API
 
 diff --git a/src/main/java/io/github/nickacpt/deepslate/enchantments/CraftCustomEnchantment.java b/src/main/java/io/github/nickacpt/deepslate/enchantments/CraftCustomEnchantment.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..809f2772581db31e731f48ff7d3cfb01c15f7083
+index 0000000000000000000000000000000000000000..997159ee2671a3d97abbc97ab86412319a0dd356
 --- /dev/null
 +++ b/src/main/java/io/github/nickacpt/deepslate/enchantments/CraftCustomEnchantment.java
-@@ -0,0 +1,112 @@
+@@ -0,0 +1,116 @@
 +package io.github.nickacpt.deepslate.enchantments;
 +
 +import io.papermc.paper.adventure.PaperAdventure;
++import net.kyori.adventure.text.format.TextColor;
 +import net.minecraft.core.Registry;
 +import net.minecraft.network.chat.Component;
 +import net.minecraft.resources.ResourceLocation;
@@ -26,6 +27,9 @@ index 0000000000000000000000000000000000000000..809f2772581db31e731f48ff7d3cfb01
 +import org.jetbrains.annotations.NotNull;
 +
 +public class CraftCustomEnchantment extends Enchantment {
++
++    //Invisible prefix used to skip custom enchantment lore lines
++    public final static net.kyori.adventure.text.Component customEnchantmentMagicSuffix = net.kyori.adventure.text.Component.space().color(TextColor.color(0xfa02ff)).append(net.kyori.adventure.text.Component.space().color(TextColor.color(0x26b8ff)));
 +
 +    public CustomEnchantment getCustomEnchantment() {
 +        return customEnchantment;
@@ -114,7 +118,7 @@ index 0000000000000000000000000000000000000000..809f2772581db31e731f48ff7d3cfb01
 +                bukkitEnchantment = org.bukkit.enchantments.EnchantmentWrapper.getByKey(CraftNamespacedKey.fromMinecraft(otherKey));
 +            }
 +        }
-+        return bukkitEnchantment != null && customEnchantment.conflictsWith(bukkitEnchantment);
++        return super.checkCompatibility(other) && bukkitEnchantment != null && !customEnchantment.conflictsWith(bukkitEnchantment);
 +    }
 +
 +    @Override
@@ -167,6 +171,53 @@ index 0000000000000000000000000000000000000000..4aa4672a59b4b64a0f84701de446ac7c
 +        return Component.text("Custom Enchantment");
 +    }
 +}
+diff --git a/src/main/java/net/minecraft/network/FriendlyByteBuf.java b/src/main/java/net/minecraft/network/FriendlyByteBuf.java
+index 70fb9001b12b105fbf471bd0127d8414e03f9329..86c512241477f14cb9467314e456ba4e989f26dc 100644
+--- a/src/main/java/net/minecraft/network/FriendlyByteBuf.java
++++ b/src/main/java/net/minecraft/network/FriendlyByteBuf.java
+@@ -472,6 +472,22 @@ public class FriendlyByteBuf extends ByteBuf {
+             if (item.canBeDepleted() || item.shouldOverrideMultiplayerNbt()) {
+                 // Spigot start - filter
+                 stack = stack.copy();
++                // Deepslate start - intercept lore and display custom enchantments
++                if (ItemStack.shouldShowInTooltip(stack.getHideFlags(), ItemStack.TooltipPart.ENCHANTMENTS)) {
++                    java.util.Set<Map.Entry<net.minecraft.world.item.enchantment.Enchantment, Integer>> enchantments = net.minecraft.world.item.enchantment.EnchantmentHelper.deserializeEnchantments(stack.getEnchantmentTags()).entrySet();
++                    for (Map.Entry<net.minecraft.world.item.enchantment.Enchantment, Integer> enchantment : enchantments) {
++                        if (enchantment.getKey() instanceof io.github.nickacpt.deepslate.enchantments.CraftCustomEnchantment customEnchantment) {
++                            org.bukkit.inventory.ItemStack itemStack = stack.asBukkitMirror();
++                            java.util.List<net.kyori.adventure.text.Component> loreList = itemStack.lore();
++                            if (loreList == null) loreList = new java.util.ArrayList<>();
++
++                            loreList.add(customEnchantment.getCustomEnchantment().displayName(enchantment.getValue()).decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false).append(io.github.nickacpt.deepslate.enchantments.CraftCustomEnchantment.customEnchantmentMagicSuffix));
++
++                            itemStack.lore(loreList);
++                        }
++                    }
++                }
++                // Deepslate end
+                 // CraftItemStack.setItemMeta(stack, CraftItemStack.getItemMeta(stack)); // Paper - This is no longer needed due to NBT being supported
+                 // Spigot end
+                 nbttagcompound = stack.getTag();
+@@ -513,6 +529,19 @@ public class FriendlyByteBuf extends ByteBuf {
+                 }
+                 // Paper end
+                 // CraftItemStack.setItemMeta(itemstack, CraftItemStack.getItemMeta(itemstack)); // Paper - This is no longer needed due to NBT being supported
++                // Deepslate start - intercept lore and remove custom enchantments if they come from itemstacks
++                org.bukkit.inventory.ItemStack bukkitStackMirror = itemstack.asBukkitMirror();
++                if (ItemStack.shouldShowInTooltip(itemstack.getHideFlags(), ItemStack.TooltipPart.ENCHANTMENTS)) {
++                    java.util.List<net.kyori.adventure.text.Component> loreList = bukkitStackMirror.lore();
++                    if (loreList != null) {
++                        loreList.removeIf(c -> {
++                            net.kyori.adventure.text.Component customEnchantmentMagicSuffix = io.github.nickacpt.deepslate.enchantments.CraftCustomEnchantment.customEnchantmentMagicSuffix;
++                            return c.contains(customEnchantmentMagicSuffix, net.kyori.adventure.text.Component.EQUALS);
++                        });
++                        bukkitStackMirror.lore(loreList);
++                    }
++                }
++                // Deepslate end
+             }
+             // CraftBukkit end
+             return itemstack;
 diff --git a/src/main/java/net/minecraft/server/commands/EnchantCommand.java b/src/main/java/net/minecraft/server/commands/EnchantCommand.java
 index a3ac6bebcef7b1e1f9c3ebe525656a15e13f9be8..2d1be1a1f37a0809368458522d34e3e01ad2e711 100644
 --- a/src/main/java/net/minecraft/server/commands/EnchantCommand.java
@@ -204,6 +255,24 @@ index 66d2559e5bd8630c6cbca0fe8d0eb1f756c388df..c96347fd43f4aa70e9de693d4d3d410e
  
              return true;
          }
+diff --git a/src/main/java/net/minecraft/world/item/ItemStack.java b/src/main/java/net/minecraft/world/item/ItemStack.java
+index 4be9924556e0f447dbe6a53c2d4cb7fb89dac455..fd3b084ac396d342edcbdcec624e35156540b29e 100644
+--- a/src/main/java/net/minecraft/world/item/ItemStack.java
++++ b/src/main/java/net/minecraft/world/item/ItemStack.java
+@@ -1052,11 +1052,11 @@ public final class ItemStack {
+         return list;
+     }
+ 
+-    private static boolean shouldShowInTooltip(int flags, ItemStack.TooltipPart tooltipSection) {
++    public static boolean shouldShowInTooltip(int flags, ItemStack.TooltipPart tooltipSection) { // Deepslate - public
+         return (flags & tooltipSection.getMask()) == 0;
+     }
+ 
+-    private int getHideFlags() {
++    public int getHideFlags() { // Deepslate - public
+         return this.hasTag() && this.tag.contains("HideFlags", 99) ? this.tag.getInt("HideFlags") : 0;
+     }
+ 
 diff --git a/src/main/java/net/minecraft/world/item/enchantment/EnchantmentCategory.java b/src/main/java/net/minecraft/world/item/enchantment/EnchantmentCategory.java
 index d6417c1e77ac8823e18a179dc9f61757a1f339ad..12271716320ac80c56a4461a123d1d1e64029556 100644
 --- a/src/main/java/net/minecraft/world/item/enchantment/EnchantmentCategory.java
