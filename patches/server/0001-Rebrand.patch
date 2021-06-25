@@ -5,21 +5,19 @@ Subject: [PATCH] Rebrand
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index ec3f43392fc844cd3e327cdf73f6cd3396ae2238..ad7c77e21a3e858ce36deadbf7923225ccd40ec6 100644
+index 92ec24aefa42e4359391e549c8dcff313c44be71..3e96fab85362e2dc3a3684e0e407a985162c4f36 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -30,8 +30,8 @@ repositories {
+@@ -30,7 +30,7 @@ repositories {
  }
  
  dependencies {
 -    implementation(project(":Purpur-API")) // Purpur
--    implementation("com.destroystokyo.paper:paper-mojangapi:1.16.5-R0.1-SNAPSHOT") // Purpur
-+    implementation(project(":Deepslate-API")) // Deepslate
-+    implementation("com.destroystokyo.paper:paper-mojangapi:1.16.5-R0.1-SNAPSHOT") // Deepslate
++    implementation(project(":Deepslate-API")) // Purpur
+     implementation("io.papermc.paper:paper-mojangapi:1.17-R0.1-SNAPSHOT") // Purpur
      // Paper start
      implementation("org.jline:jline-terminal-jansi:3.12.1")
-     implementation("net.minecrell:terminalconsoleappender:1.2.0")
-@@ -82,7 +82,7 @@ tasks.jar {
+@@ -83,7 +83,7 @@ tasks.jar {
          attributes(
              "Main-Class" to "org.bukkit.craftbukkit.Main",
              "Implementation-Title" to "CraftBukkit",
@@ -55,10 +53,10 @@ index 43a88bc58716eef4040584944f52893c5a47699f..8808be0234448220e3ceb6306a4757f3
                      if (outputStream != null) {
                          try {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index f82dcc723adf0157cb4122b1c9dc3e0bce55d0a3..3d254f5df614affa661ed2bd44dcf9b707556461 100644
+index ec6b9574fcbcae429d09da367720eab73d099806..851c10ea75f524ebf598f55bd9193bcf1bda6f0b 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -1664,7 +1664,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -1729,7 +1729,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
  
      @DontObfuscate
      public String getServerModName() {
@@ -68,7 +66,7 @@ index f82dcc723adf0157cb4122b1c9dc3e0bce55d0a3..3d254f5df614affa661ed2bd44dcf9b7
  
      public SystemReport fillSystemReport(SystemReport systemreport) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 591a15667346eb2adad7b26821dd128fe28967fc..9a884e953b46b4b57cebed39e8d6a4acaae61cd0 100644
+index 12247ec81ecc7be6e28f39cee2cfeeda52056da3..78eecb127deaa6c230df784862c8f32d4c835488 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -230,7 +230,7 @@ import javax.annotation.Nullable; // Paper

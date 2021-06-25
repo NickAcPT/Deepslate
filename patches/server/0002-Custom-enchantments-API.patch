@@ -131,10 +131,10 @@ index a3ac6bebcef7b1e1f9c3ebe525656a15e13f9be8..2d1be1a1f37a0809368458522d34e3e0
          }).then(Commands.argument("level", IntegerArgumentType.integer(0)).executes((context) -> {
              return enchant(context.getSource(), EntityArgument.getEntities(context, "targets"), ItemEnchantmentArgument.getEnchantment(context, "enchantment"), IntegerArgumentType.getInteger(context, "level"));
 diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-index 4d664df40745d1a9fba63245bccc1f6ebfc73f29..263a917299e58bb8e2f98a4b7f8df6ee3303987f 100644
+index 66d2559e5bd8630c6cbca0fe8d0eb1f756c388df..c96347fd43f4aa70e9de693d4d3d410e4d927bb6 100644
 --- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-@@ -347,6 +347,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
+@@ -348,6 +348,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
              }
  
              net.pl3x.purpur.task.TPSBarTask.start(); // Purpur
@@ -162,10 +162,10 @@ index d6417c1e77ac8823e18a179dc9f61757a1f339ad..12271716320ac80c56a4461a123d1d1e
  
      public abstract boolean canEnchant(Item item);
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 9a884e953b46b4b57cebed39e8d6a4acaae61cd0..67195d454752d9cee220f62e70fa5c738d89afe2 100644
+index 78eecb127deaa6c230df784862c8f32d4c835488..361c1233fa50e93c584594e6b10ffdae8513d21a 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -2546,4 +2546,13 @@ public final class CraftServer implements Server {
+@@ -2556,4 +2556,13 @@ public final class CraftServer implements Server {
          return getServer().lagging;
      }
      // Purpur end
