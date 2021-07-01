@@ -332,10 +332,10 @@ index 585b29a214d0306ac2d6a170125270c1bbd7c58d..b22676f8b65075decfaceb7d4b69776c
 +    //Deepslate end
  }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 78eecb127deaa6c230df784862c8f32d4c835488..361c1233fa50e93c584594e6b10ffdae8513d21a 100644
+index 1014dac4c74a915d1bd9637fa6398bebd699444e..96022015f8dc816a9019a04125bb5faae2dfa355 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -2556,4 +2556,13 @@ public final class CraftServer implements Server {
+@@ -2566,4 +2566,13 @@ public final class CraftServer implements Server {
          return getServer().lagging;
      }
      // Purpur end

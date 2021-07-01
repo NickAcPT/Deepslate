@@ -5,7 +5,7 @@ Subject: [PATCH] Rebrand
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 92ec24aefa42e4359391e549c8dcff313c44be71..3e96fab85362e2dc3a3684e0e407a985162c4f36 100644
+index fba83a632abace5c2b280ea5919175f9574429f6..4f57d3f5488409e0adb384cf2784adb43c07b273 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -30,7 +30,7 @@ repositories {
@@ -26,6 +26,23 @@ index 92ec24aefa42e4359391e549c8dcff313c44be71..3e96fab85362e2dc3a3684e0e407a985
              "Implementation-Vendor" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(Date()), // Paper
              "Specification-Title" to "Bukkit",
              "Specification-Version" to project.version,
+@@ -133,7 +133,7 @@ tasks.shadowJar {
+     mergeServiceFiles()
+     transform(ModifiedLog4j2PluginsCacheFileTransformer::class.java)
+ }
+-
++/* Deepslate start - do not include mappings as Paperweight is broken
+ // Paper start - include reobf mappings in jar for stacktrace deobfuscation
+ abstract class IncludeMappings : BaseTask() {
+     @get:InputFile
+@@ -171,6 +171,7 @@ tasks.reobfJar {
+     inputJar.set(includeMappings.flatMap { it.outputJar })
+ }
+ // Paper end - include reobf mappings in jar for stacktrace deobfuscation
++Deepslate end - do not include mappings as Paperweight is broken - */
+ 
+ tasks.test {
+     exclude("org/bukkit/craftbukkit/inventory/ItemStack*Test.class")
 diff --git a/src/main/java/com/destroystokyo/paper/console/PaperConsole.java b/src/main/java/com/destroystokyo/paper/console/PaperConsole.java
 index 8c3c68465197fafc14849dc38a572e309931e2a2..403ac08928f1aa24f633dc5fb7126b7049266353 100644
 --- a/src/main/java/com/destroystokyo/paper/console/PaperConsole.java
@@ -53,7 +70,7 @@ index 43a88bc58716eef4040584944f52893c5a47699f..8808be0234448220e3ceb6306a4757f3
                      if (outputStream != null) {
                          try {
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index ec6b9574fcbcae429d09da367720eab73d099806..851c10ea75f524ebf598f55bd9193bcf1bda6f0b 100644
+index 108dadb24607ea42cf857879386c34c9bb72dbee..bdbc50706c6524e9801ee11a3d1300bba89c475b 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -1729,7 +1729,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
@@ -66,7 +83,7 @@ index ec6b9574fcbcae429d09da367720eab73d099806..851c10ea75f524ebf598f55bd9193bcf
  
      public SystemReport fillSystemReport(SystemReport systemreport) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 12247ec81ecc7be6e28f39cee2cfeeda52056da3..78eecb127deaa6c230df784862c8f32d4c835488 100644
+index e6c77e7ecfa03f948423a68df0266210d0a0274d..1014dac4c74a915d1bd9637fa6398bebd699444e 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -230,7 +230,7 @@ import javax.annotation.Nullable; // Paper
