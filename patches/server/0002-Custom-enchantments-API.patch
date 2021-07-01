@@ -308,7 +308,7 @@ index d6417c1e77ac8823e18a179dc9f61757a1f339ad..12271716320ac80c56a4461a123d1d1e
  
      public abstract boolean canEnchant(Item item);
 diff --git a/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java b/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java
-index 585b29a214d0306ac2d6a170125270c1bbd7c58d..b22676f8b65075decfaceb7d4b69776c51ce5a28 100644
+index 585b29a214d0306ac2d6a170125270c1bbd7c58d..8f0d4e45290f27df7a088e19dd18e9a1ae989b4e 100644
 --- a/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java
 +++ b/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java
 @@ -411,4 +411,19 @@ public class EnchantmentHelper {
@@ -324,7 +324,7 @@ index 585b29a214d0306ac2d6a170125270c1bbd7c58d..b22676f8b65075decfaceb7d4b69776c
 +                if (!(player.getBukkitEntity() instanceof org.bukkit.entity.Player bukkitPlayer)) return;
 +
 +                if (event instanceof org.bukkit.event.block.BlockBreakEvent blockBreakEvent) {
-+                    bukkitEnchantment.onBlockBreak(blockBreakEvent, bukkitPlayer, itemStack.getBukkitStack());
++                    bukkitEnchantment.onBlockBreak(blockBreakEvent, level, bukkitPlayer, itemStack.getBukkitStack());
 +                }
 +            }
 +        }, itemStack);
