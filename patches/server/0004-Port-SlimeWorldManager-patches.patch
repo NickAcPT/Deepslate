@@ -1,0 +1,139 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: NickAc <32451103+NickAcPT@users.noreply.github.com>
+Date: Sun, 4 Jul 2021 02:30:04 +0100
+Subject: [PATCH] Port SlimeWorldManager patches
+
+
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index bdbc50706c6524e9801ee11a3d1300bba89c475b..2b595ca723b3b455a26a9fea4c24a542c2e74d41 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -546,12 +546,13 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+             overworldData = new PrimaryLevelData(worldsettings, generatorsettings, Lifecycle.stable());
+         }
+ 
++        ServerLevel[] defaultWorlds = (ServerLevel[]) com.grinderwolf.swm.clsm.ClassModifier.getDefaultWorlds(); // Deepslate - Fetch world from SWM
+         WorldGenSettings overworldSettings = overworldData.worldGenSettings();
+         MappedRegistry<LevelStem> registrymaterials = overworldSettings.dimensions();
+         for (Entry<ResourceKey<LevelStem>, LevelStem> entry : registrymaterials.entrySet()) {
+             ResourceKey<LevelStem> dimensionKey = entry.getKey();
+ 
+-            ServerLevel world;
++            ServerLevel world = null; // Deepslate - Fetch world from SWM
+             int dimension = 0;
+ 
+             if (dimensionKey == LevelStem.NETHER) {
+@@ -570,6 +571,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+                 dimension = -999;
+             }
+ 
++            if (defaultWorlds != null) world = defaultWorlds[dimension]; // Deepslate - Fetch world from SWM
++
+             String worldType = (dimension == -999) ? dimensionKey.location().getNamespace() + "_" + dimensionKey.location().getPath() : org.bukkit.World.Environment.getEnvironment(dimension).toString().toLowerCase();
+             String name = (dimensionKey == LevelStem.OVERWORLD) ? s : s + "_" + worldType;
+             if (dimension != 0) {
+@@ -671,6 +674,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+ 
+                 ChunkProgressListener worldloadlistener = this.progressListenerFactory.create(11);
+ 
++                if (world == null) // Deepslate - Fetch world from SWM
+                 world = new ServerLevel(this, this.executor, worldSession, iworlddataserver, worldKey, dimensionmanager, worldloadlistener, chunkgenerator, flag, j, list, true, org.bukkit.World.Environment.getEnvironment(dimension), gen);
+                 DimensionDataStorage worldpersistentdata = world.getDataStorage();
+                 this.readScoreboard(worldpersistentdata);
+@@ -678,6 +682,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+                 this.commandStorage = new CommandStorage(worldpersistentdata);
+             } else {
+                 ChunkProgressListener worldloadlistener = this.progressListenerFactory.create(11);
++                if (world == null) // Deepslate - Fetch world from SWM
+                 world = new ServerLevel(this, this.executor, worldSession, iworlddataserver, worldKey, dimensionmanager, worldloadlistener, chunkgenerator, flag, j, ImmutableList.of(), true, org.bukkit.World.Environment.getEnvironment(dimension), gen);
+             }
+ 
+@@ -939,6 +944,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+     }
+ 
+     public GameType getDefaultGameType() {
++        // Deepslate start
++        GameType gamemode = (GameType) com.grinderwolf.swm.clsm.ClassModifier.getDefaultGamemode();
++        if (gamemode != null) return gamemode;
++        // Deepslate end
+         return this.worldData.getGameType();
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/level/ChunkMap.java b/src/main/java/net/minecraft/server/level/ChunkMap.java
+index 9c2095c67628ad3eba5b614359eb48f4fb4ca743..2187ac0ff5669b8290c70f9bcc8c5bc7037edb52 100644
+--- a/src/main/java/net/minecraft/server/level/ChunkMap.java
++++ b/src/main/java/net/minecraft/server/level/ChunkMap.java
+@@ -1169,6 +1169,12 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
+     }
+ 
+     private CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> scheduleChunkLoad(ChunkPos pos) {
++        // Deepslate start
++        java.util.concurrent.CompletableFuture chunk = com.grinderwolf.swm.clsm.ClassModifier.getFutureChunk(level, pos.x, pos.z);
++        if (chunk != null) {
++            return chunk;
++        }
++        // Deepslate end
+         // Paper start - Async chunk io
+         final java.util.function.BiFunction<ChunkSerializer.InProgressChunkHolder, Throwable, Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> syncLoadComplete = (chunkHolder, ioThrowable) -> {
+             try (Timing ignored = this.level.timings.chunkLoad.startTimingIfSync()) { // Paper
+@@ -1468,6 +1474,11 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
+     }
+ 
+     public boolean save(ChunkAccess chunk) {
++        // Deepslate start
++        if (com.grinderwolf.swm.clsm.ClassModifier.saveChunk(level, chunk)) {
++            return false;
++        }
++        // Deepslate end
+         try (co.aikar.timings.Timing ignored = this.level.timings.chunkSave.startTiming()) { // Paper
+         this.poiManager.flush(chunk.getPos());
+         if (!chunk.isUnsaved()) {
+diff --git a/src/main/java/net/minecraft/world/entity/npc/WanderingTraderSpawner.java b/src/main/java/net/minecraft/world/entity/npc/WanderingTraderSpawner.java
+index 56967cef0f184def046935e20148574f24524f44..74b634e8b3c98fcea6df45e74ac81807aaddfa3d 100644
+--- a/src/main/java/net/minecraft/world/entity/npc/WanderingTraderSpawner.java
++++ b/src/main/java/net/minecraft/world/entity/npc/WanderingTraderSpawner.java
+@@ -60,6 +60,11 @@ public class WanderingTraderSpawner implements CustomSpawner {
+ 
+     @Override
+     public int tick(ServerLevel world, boolean spawnMonsters, boolean spawnAnimals) {
++        // Deepslate start
++        if (com.grinderwolf.swm.clsm.ClassModifier.isCustomWorld(world)) {
++            return 0;
++        }
++        // Deepslate end
+         // Paper start
+         if (this.tickDelay == Integer.MIN_VALUE) {
+             this.tickDelay = world.paperConfig.wanderingTraderSpawnMinuteTicks;
+diff --git a/src/main/java/net/minecraft/world/level/saveddata/SavedData.java b/src/main/java/net/minecraft/world/level/saveddata/SavedData.java
+index 5d60a4ebbd039077c4d2458ac8d8110097eb74a3..d595e6c15cd0791d7174ffc222d6fed7bf4c8b9b 100644
+--- a/src/main/java/net/minecraft/world/level/saveddata/SavedData.java
++++ b/src/main/java/net/minecraft/world/level/saveddata/SavedData.java
+@@ -27,6 +27,12 @@ public abstract class SavedData {
+     }
+ 
+     public void save(File file) {
++        // Deepslate start
++        if (!file.getParentFile().exists()) {
++            setDirty(false);
++            return;
++        }
++        // Deepslate end
+         if (this.isDirty()) {
+             CompoundTag compoundTag = new CompoundTag();
+             compoundTag.put("data", this.save(new CompoundTag()));
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 96022015f8dc816a9019a04125bb5faae2dfa355..34c04faec844f1b2dcb70adca4c688b0c158944f 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -1276,6 +1276,11 @@ public final class CraftServer implements Server {
+     // Paper end
+ 
+     public void addWorld(World world) {
++        // Deepslate start
++        if (com.grinderwolf.swm.clsm.ClassModifier.skipWorldAdd(((org.bukkit.craftbukkit.CraftWorld) world).getHandle())) {
++            return;
++        }
++        // Deepslate end
+         // Check if a World already exists with the UID.
+         if (this.getWorld(world.getUID()) != null) {
+             System.out.println("World " + world.getName() + " is a duplicate of another world and has been prevented from loading. Please delete the uid.dat file from " + world.getName() + "'s world directory if you want to be able to load the duplicate world.");
