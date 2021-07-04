@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: NickAc <32451103+NickAcPT@users.noreply.github.com>
+Date: Sun, 4 Jul 2021 18:13:55 +0100
+Subject: [PATCH] Add game profile Display Unique ID
+
+Allows server-side disguising to be performed without leaking the player id directly.
+
+diff --git a/src/main/java/com/destroystokyo/paper/profile/PlayerProfile.java b/src/main/java/com/destroystokyo/paper/profile/PlayerProfile.java
+index 2ef9a7bd55e2c9cf8cb20d5f77282676ae11181f..c6aba8d82cef5791594af32232efdfe442a362e2 100644
+--- a/src/main/java/com/destroystokyo/paper/profile/PlayerProfile.java
++++ b/src/main/java/com/destroystokyo/paper/profile/PlayerProfile.java
+@@ -40,6 +40,22 @@ public interface PlayerProfile {
+     @Nullable
+     UUID setId(@Nullable UUID uuid);
+ 
++    // Deepslate start - Add game profile Display Unique ID
++    /**
++     * @return The players unique display identifier, if set
++     */
++    @Nullable UUID getDisplayId();
++
++    /**
++     * Sets this profiles display UUID
++     *
++     * @param uuid The new UUID
++     * @return The previous UUID
++     */
++    @Nullable
++    UUID setDisplayId(@Nullable UUID uuid);
++    // Deepslate end - Add game profile Display Unique ID
++
+     /**
+      * @return A Mutable set of this players properties, such as textures.
+      * Values specified here are subject to implementation details.

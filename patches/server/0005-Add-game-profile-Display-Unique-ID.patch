@@ -1,0 +1,265 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: NickAc <32451103+NickAcPT@users.noreply.github.com>
+Date: Sun, 4 Jul 2021 18:14:26 +0100
+Subject: [PATCH] Add game profile Display Unique ID
+
+Allows server-side disguising to be performed without leaking the player id directly.
+
+diff --git a/src/main/java/com/destroystokyo/paper/profile/CraftPlayerProfile.java b/src/main/java/com/destroystokyo/paper/profile/CraftPlayerProfile.java
+index ef6aab69daa7ab952408b573bff6c6996cbc349a..c5976569e0376d251a2bd97c90b04ab6f192f8dd 100644
+--- a/src/main/java/com/destroystokyo/paper/profile/CraftPlayerProfile.java
++++ b/src/main/java/com/destroystokyo/paper/profile/CraftPlayerProfile.java
+@@ -35,6 +35,12 @@ public class CraftPlayerProfile implements PlayerProfile {
+         this.profile = new GameProfile(id, name);
+     }
+ 
++    // Deepslate start
++    public CraftPlayerProfile(UUID id, UUID displayId, String name) {
++        this.profile = new GameProfile(id, displayId, name);
++    }
++    // Deepslate end
++
+     public CraftPlayerProfile(GameProfile profile) {
+         Validate.notNull(profile, "GameProfile cannot be null!");
+         this.profile = profile;
+@@ -71,6 +77,21 @@ public class CraftPlayerProfile implements PlayerProfile {
+         return prev.getId();
+     }
+ 
++    // Deepslate start
++    @Override
++    public UUID getDisplayId() {
++        return profile.getDisplayId();
++    }
++
++    @Override
++    public UUID setDisplayId(UUID displayUuid) {
++        GameProfile prev = this.profile;
++        this.profile = new GameProfile(prev.getId(), displayUuid, prev.getName());
++        copyProfileProperties(prev, this.profile);
++        return prev.getId();
++    }
++    // Deepslate end
++
+     @Nullable
+     @Override
+     public String getName() {
+@@ -126,7 +147,7 @@ public class CraftPlayerProfile implements PlayerProfile {
+ 
+     @Override
+     public CraftPlayerProfile clone() {
+-        CraftPlayerProfile clone = new CraftPlayerProfile(this.getId(), this.getName());
++        CraftPlayerProfile clone = new CraftPlayerProfile(this.getId(), this.getDisplayId(), this.getName());
+         clone.setProperties(getProperties());
+         return clone;
+     }
+diff --git a/src/main/java/com/mojang/authlib/GameProfile.java b/src/main/java/com/mojang/authlib/GameProfile.java
+index 1369f0e680bd581a7fb93fb37ef5ab3d6aee5c98..69e99b31741aea0906dd6c991b7ae5df3059f980 100644
+--- a/src/main/java/com/mojang/authlib/GameProfile.java
++++ b/src/main/java/com/mojang/authlib/GameProfile.java
+@@ -7,9 +7,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
+ import java.util.UUID;
+ 
+ public class GameProfile {
++    private UUID displayId; // Deepslate
+     private final UUID id;
+     private final String name;
+-    private final PropertyMap properties = new PropertyMap();
++    private PropertyMap properties = new PropertyMap(); // Deepslate - final -> not final
+     private boolean legacy;
+ 
+     /**
+@@ -29,6 +30,22 @@ public class GameProfile {
+         this.id = id;
+         this.name = name;
+     }
++    // Deepslate start
++    /**
++     * Constructs a new Game Profile with the specified ID and name.
++     * <p />
++     * Either ID or name may be null/empty, but at least one must be filled.
++     *
++     * @param id Unique ID of the profile
++     * @param displayId Display Unique ID of the profile
++     * @param name Display name of the profile
++     * @throws java.lang.IllegalArgumentException Both ID and name are either null or empty
++     */
++    public GameProfile(final UUID id, final UUID displayId, final String name) {
++        this(id, name);
++        this.displayId = displayId;
++    }
++    // Deepslate end
+ 
+     /**
+      * Gets the unique ID of this game profile.
+@@ -41,6 +58,19 @@ public class GameProfile {
+         return id;
+     }
+ 
++    // Deepslate start
++    /**
++     * Gets the unique Display ID of this game profile.
++     * <p />
++     * This may be null for partial profile data if constructed manually.
++     *
++     * @return Display ID of the profile
++     */
++    public UUID getDisplayId() {
++        return displayId;
++    }
++    // Deepslate end
++
+     /**
+      * Gets the display name of this game profile.
+      * <p />
+@@ -113,4 +143,19 @@ public class GameProfile {
+     public boolean isLegacy() {
+         return legacy;
+     }
++
++    // Deepslate start
++    /**
++     * Gets a copy of this profile if it includes a Display ID, or itself if it doesn't.
++     * @return A GameProfile with a different Unique ID if needed
++     */
++    public GameProfile getDisplayProfile() {
++        if (displayId != null) {
++            GameProfile copyProfile = new GameProfile(displayId, name);
++            copyProfile.properties = this.properties;
++            return copyProfile;
++        }
++        return this;
++    }
++    // Deepslate end
+ }
+diff --git a/src/main/java/net/minecraft/network/protocol/game/ClientboundAddPlayerPacket.java b/src/main/java/net/minecraft/network/protocol/game/ClientboundAddPlayerPacket.java
+index ab823de3fe0eb4870cd7fec543730d6d17060940..750fccb5418eaef96f15d6931be4676b5d845638 100644
+--- a/src/main/java/net/minecraft/network/protocol/game/ClientboundAddPlayerPacket.java
++++ b/src/main/java/net/minecraft/network/protocol/game/ClientboundAddPlayerPacket.java
+@@ -16,7 +16,7 @@ public class ClientboundAddPlayerPacket implements Packet<ClientGamePacketListen
+ 
+     public ClientboundAddPlayerPacket(Player player) {
+         this.entityId = player.getId();
+-        this.playerId = player.getGameProfile().getId();
++        this.playerId = player.getGameProfile().getDisplayProfile().getId(); // Deepslate - use display gameprofile
+         this.x = player.getX();
+         this.y = player.getY();
+         this.z = player.getZ();
+diff --git a/src/main/java/net/minecraft/network/protocol/game/ClientboundPlayerInfoPacket.java b/src/main/java/net/minecraft/network/protocol/game/ClientboundPlayerInfoPacket.java
+index 420cc7ab5f7245f31dd5b333eacf4e306fc6e7c1..628a60c6bd02ba371ae3bfb56ff9a8800ed9bfb8 100644
+--- a/src/main/java/net/minecraft/network/protocol/game/ClientboundPlayerInfoPacket.java
++++ b/src/main/java/net/minecraft/network/protocol/game/ClientboundPlayerInfoPacket.java
+@@ -24,6 +24,7 @@ public class ClientboundPlayerInfoPacket implements Packet<ClientGamePacketListe
+ 
+         for(ServerPlayer serverPlayer : players) {
+             this.entries.add(new ClientboundPlayerInfoPacket.PlayerUpdate(serverPlayer.getGameProfile(), serverPlayer.latency, serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.getTabListDisplayName()));
++            fixActionIfNeeded(action, serverPlayer); // Deepslate - fix display id removal
+         }
+ 
+     }
+@@ -34,10 +35,22 @@ public class ClientboundPlayerInfoPacket implements Packet<ClientGamePacketListe
+ 
+         for(ServerPlayer serverPlayer : players) {
+             this.entries.add(new ClientboundPlayerInfoPacket.PlayerUpdate(serverPlayer.getGameProfile(), serverPlayer.latency, serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.getTabListDisplayName()));
++            fixActionIfNeeded(action, serverPlayer); // Deepslate - fix display id removal
+         }
+ 
+     }
+ 
++    // Deepslate start
++    private void fixActionIfNeeded(Action action, ServerPlayer serverPlayer) {
++        if (action == Action.REMOVE_PLAYER && serverPlayer.getGameProfile().getDisplayProfile().getDisplayId() != null) {
++            //If there is a display id, remove the original uuid from the list of players
++            PlayerUpdate update = new PlayerUpdate(serverPlayer.getGameProfile(), serverPlayer.latency, serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.getTabListDisplayName());
++
++            this.entries.add(update);
++        }
++    }
++    // Deepslate end
++
+     public ClientboundPlayerInfoPacket(FriendlyByteBuf buf) {
+         this.action = buf.readEnum(ClientboundPlayerInfoPacket.Action.class);
+         this.entries = buf.readList(this.action::read);
+@@ -188,10 +201,22 @@ public class ClientboundPlayerInfoPacket implements Packet<ClientGamePacketListe
+     public static class PlayerUpdate {
+         private final int latency;
+         private final GameType gameMode;
+-        private final GameProfile profile;
++        private GameProfile profile; // Deepslate - final -> not final
+         @Nullable
+         private final Component displayName;
+ 
++        // Deepslate start
++        private boolean forceRealProfile = false;
++
++        public boolean isForceRealProfile() {
++            return forceRealProfile;
++        }
++
++        public void setForceRealProfile(boolean forceRealProfile) {
++            this.forceRealProfile = forceRealProfile;
++        }
++        // Deepslate end
++
+         public PlayerUpdate(GameProfile profile, int latency, @Nullable GameType gameMode, @Nullable Component displayName) {
+             this.profile = profile;
+             this.latency = latency;
+@@ -200,9 +225,16 @@ public class ClientboundPlayerInfoPacket implements Packet<ClientGamePacketListe
+         }
+ 
+         public GameProfile getProfile() {
++            if (!forceRealProfile) return this.profile.getDisplayProfile();
+             return this.profile;
+         }
+ 
++        // Deepslate start
++        public void setProfile(GameProfile profile) {
++            this.profile = profile;
++        }
++        // Deepslate end
++
+         public int getLatency() {
+             return this.latency;
+         }
+diff --git a/src/main/java/net/minecraft/server/level/ServerPlayer.java b/src/main/java/net/minecraft/server/level/ServerPlayer.java
+index 434558824edd85809a747a436f2ad429e57a618c..7e35091719e9aff77e6dfb39b1b419a903746134 100644
+--- a/src/main/java/net/minecraft/server/level/ServerPlayer.java
++++ b/src/main/java/net/minecraft/server/level/ServerPlayer.java
+@@ -1863,6 +1863,7 @@ public class ServerPlayer extends Player {
+ 
+     @Override
+     public void sendMessage(Component message, UUID sender) {
++        if (uuid.equals(sender)) uuid = getGameProfile().getDisplayProfile().getId(); // Arcadium - Use Display profile
+         this.sendMessage(message, ChatType.SYSTEM, sender);
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
+index 082deb251fa793561cc4366cc7b03d7b73bd02ba..641398e591e36b5c9bf91e74547530d2e39dff9d 100644
+--- a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
++++ b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
+@@ -55,6 +55,7 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+ import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
+ import net.minecraft.network.protocol.game.ClientboundKeepAlivePacket;
+ import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
++import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+ import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+ import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
+ import net.minecraft.network.protocol.game.ClientboundSetDefaultSpawnPositionPacket;
+@@ -2037,6 +2038,17 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+     }
+ 
+     public void send(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> listener) {
++        // Deepslate start
++        if (packet instanceof ClientboundPlayerInfoPacket playerInfo) {
++            List<ClientboundPlayerInfoPacket.PlayerUpdate> entries = playerInfo.getEntries();
++            entries.forEach(action -> {
++                // Do not change profile for self
++                if (action.getProfile().getDisplayId() != null && player.getUUID().equals(action.getProfile().getId())) {
++                    action.setForceRealProfile(true);
++                }
++            });
++        }
++        // Deepslate end
+         // CraftBukkit start
+         if (packet == null || this.processedDisconnect) { // Spigot
+             return;
