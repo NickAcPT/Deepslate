@@ -5,7 +5,7 @@ Subject: [PATCH] Implement SlimeWorldManager NMS classes
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 4f57d3f5488409e0adb384cf2784adb43c07b273..8f09a0bbc6fdfc8db99e5f9c70ff15ba36d6138b 100644
+index 4f57d3f5488409e0adb384cf2784adb43c07b273..68df235cebf60d3f6f217fb01a987b0bc8766a14 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -1,3 +1,4 @@
@@ -23,14 +23,13 @@ index 4f57d3f5488409e0adb384cf2784adb43c07b273..8f09a0bbc6fdfc8db99e5f9c70ff15ba
  }
  
  dependencies {
-@@ -67,6 +71,19 @@ dependencies {
+@@ -67,6 +71,18 @@ dependencies {
  
      implementation("org.quiltmc:tiny-mappings-parser:0.3.0") // Paper - needed to read mappings for stacktrace deobfuscation
  
 +    // Deepslate start - Slime World Manager interop
 +    implementation("com.github.luben:zstd-jni:1.4.9-5")
 +    implementation("com.zaxxer:HikariCP:3.3.1")
-+    implementation("org.mongodb:mongo-java-driver:3.11.0-rc0")
 +    implementation("io.lettuce:lettuce-core:6.1.1.RELEASE")
 +    implementation("org.spongepowered:configurate-yaml:3.7-SNAPSHOT")
 +    implementation("org.bstats:bstats-bukkit:1.5")
