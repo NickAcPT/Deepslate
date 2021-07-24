@@ -172,10 +172,10 @@ index 0000000000000000000000000000000000000000..4aa4672a59b4b64a0f84701de446ac7c
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/network/FriendlyByteBuf.java b/src/main/java/net/minecraft/network/FriendlyByteBuf.java
-index 70fb9001b12b105fbf471bd0127d8414e03f9329..86c512241477f14cb9467314e456ba4e989f26dc 100644
+index e3b80334164ba48e83cca0b9a7f3a8ddf05dd598..98db996df07a231635891c2dba85e9b80319457e 100644
 --- a/src/main/java/net/minecraft/network/FriendlyByteBuf.java
 +++ b/src/main/java/net/minecraft/network/FriendlyByteBuf.java
-@@ -472,6 +472,22 @@ public class FriendlyByteBuf extends ByteBuf {
+@@ -497,6 +497,22 @@ public class FriendlyByteBuf extends ByteBuf {
              if (item.canBeDepleted() || item.shouldOverrideMultiplayerNbt()) {
                  // Spigot start - filter
                  stack = stack.copy();
@@ -198,7 +198,7 @@ index 70fb9001b12b105fbf471bd0127d8414e03f9329..86c512241477f14cb9467314e456ba4e
                  // CraftItemStack.setItemMeta(stack, CraftItemStack.getItemMeta(stack)); // Paper - This is no longer needed due to NBT being supported
                  // Spigot end
                  nbttagcompound = stack.getTag();
-@@ -513,6 +529,19 @@ public class FriendlyByteBuf extends ByteBuf {
+@@ -538,6 +554,19 @@ public class FriendlyByteBuf extends ByteBuf {
                  }
                  // Paper end
                  // CraftItemStack.setItemMeta(itemstack, CraftItemStack.getItemMeta(itemstack)); // Paper - This is no longer needed due to NBT being supported
@@ -244,22 +244,22 @@ index a3ac6bebcef7b1e1f9c3ebe525656a15e13f9be8..2d1be1a1f37a0809368458522d34e3e0
          }).then(Commands.argument("level", IntegerArgumentType.integer(0)).executes((context) -> {
              return enchant(context.getSource(), EntityArgument.getEntities(context, "targets"), ItemEnchantmentArgument.getEnchantment(context, "enchantment"), IntegerArgumentType.getInteger(context, "level"));
 diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-index 66d2559e5bd8630c6cbca0fe8d0eb1f756c388df..c96347fd43f4aa70e9de693d4d3d410e4d927bb6 100644
+index d6502173bebba1a1c62deea2e14b40d7942736f6..78cfb375554203351912f0b2f9c64064950f8eeb 100644
 --- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-@@ -348,6 +348,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
+@@ -350,6 +350,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
              }
  
-             net.pl3x.purpur.task.TPSBarTask.start(); // Purpur
+             net.pl3x.purpur.task.BossBarTask.startAll(); // Purpur
 +            org.bukkit.Bukkit.registerEnchantment(new io.github.nickacpt.deepslate.enchantments.TestCustomEnchantment());
  
              return true;
          }
 diff --git a/src/main/java/net/minecraft/server/level/ServerPlayerGameMode.java b/src/main/java/net/minecraft/server/level/ServerPlayerGameMode.java
-index a25e4eeb1ce4e18c7cb14e269ad3852715209cb9..c87503bceda9e83562ac5491c503f3b5ff29b3a8 100644
+index 38323c95dc36e5ead294670ce120114492de37d5..69531c096fbd5ffef27bc432d4d7a7f6231f29be 100644
 --- a/src/main/java/net/minecraft/server/level/ServerPlayerGameMode.java
 +++ b/src/main/java/net/minecraft/server/level/ServerPlayerGameMode.java
-@@ -400,6 +400,10 @@ public class ServerPlayerGameMode {
+@@ -401,6 +401,10 @@ public class ServerPlayerGameMode {
  
              this.level.getCraftServer().getPluginManager().callEvent(event);
  
@@ -271,10 +271,10 @@ index a25e4eeb1ce4e18c7cb14e269ad3852715209cb9..c87503bceda9e83562ac5491c503f3b5
                  if (isSwordNoBreak) {
                      return false;
 diff --git a/src/main/java/net/minecraft/world/item/ItemStack.java b/src/main/java/net/minecraft/world/item/ItemStack.java
-index 4be9924556e0f447dbe6a53c2d4cb7fb89dac455..fd3b084ac396d342edcbdcec624e35156540b29e 100644
+index af0a195fb82eb7872bc6206d39c2963bd468ccd6..5a344e1b60dde80a421a8f7fe292f0c223d12fc4 100644
 --- a/src/main/java/net/minecraft/world/item/ItemStack.java
 +++ b/src/main/java/net/minecraft/world/item/ItemStack.java
-@@ -1052,11 +1052,11 @@ public final class ItemStack {
+@@ -1054,11 +1054,11 @@ public final class ItemStack {
          return list;
      }
  
@@ -308,10 +308,10 @@ index d6417c1e77ac8823e18a179dc9f61757a1f339ad..12271716320ac80c56a4461a123d1d1e
  
      public abstract boolean canEnchant(Item item);
 diff --git a/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java b/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java
-index 585b29a214d0306ac2d6a170125270c1bbd7c58d..8f0d4e45290f27df7a088e19dd18e9a1ae989b4e 100644
+index 955e482e4bc83f2b777cd2e4254c40beef08853b..d4b09879ae7210cf8ace5d6a6f2916d6d809cfa1 100644
 --- a/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java
 +++ b/src/main/java/net/minecraft/world/item/enchantment/EnchantmentHelper.java
-@@ -411,4 +411,19 @@ public class EnchantmentHelper {
+@@ -435,4 +435,19 @@ public class EnchantmentHelper {
      interface EnchantmentVisitor {
          void accept(Enchantment enchantment, int level);
      }
@@ -332,10 +332,10 @@ index 585b29a214d0306ac2d6a170125270c1bbd7c58d..8f0d4e45290f27df7a088e19dd18e9a1
 +    //Deepslate end
  }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 1014dac4c74a915d1bd9637fa6398bebd699444e..96022015f8dc816a9019a04125bb5faae2dfa355 100644
+index ff33379411fa92911090f0d92d97bb2fc6bce7ee..c9db8664482c7ebea34f3b3e984bedde3d057084 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -2566,4 +2566,13 @@ public final class CraftServer implements Server {
+@@ -2643,4 +2643,13 @@ public final class CraftServer implements Server {
          return getServer().lagging;
      }
      // Purpur end

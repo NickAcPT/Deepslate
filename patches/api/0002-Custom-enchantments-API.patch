@@ -107,10 +107,10 @@ index 0000000000000000000000000000000000000000..041f69ccbcaea70dcfe29d8dfb2415a2
 +}
 \ No newline at end of file
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
-index 82978d66cc7d6214cf84f566918bfaf6bcbe1118..e33f8d64e5ad344a1425991a5a877433cd9c1c8b 100644
+index 34902835cd4e030902feb568a2315c7f5d60f0eb..8459751e3d15318216e92f10942be4a4861f38b1 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
-@@ -2026,4 +2026,14 @@ public final class Bukkit {
+@@ -2081,4 +2081,14 @@ public final class Bukkit {
          return server.isLagging();
      }
      // Purpur end
@@ -126,10 +126,10 @@ index 82978d66cc7d6214cf84f566918bfaf6bcbe1118..e33f8d64e5ad344a1425991a5a877433
 +    // Deepslate end
  }
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 2f9ee4cf3b2163dbe086b4d40179bfa64ebfdecf..0356697fe9ac5e6826ac657094813b37db68805d 100644
+index 061ce81a781ac1c577927972b862f48a453ba400..98d0f3a97a3230bf42c095a668232fe650e9ded2 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
-@@ -1775,4 +1775,13 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
+@@ -1826,4 +1826,13 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
       */
      boolean isLagging();
      // Purpur end

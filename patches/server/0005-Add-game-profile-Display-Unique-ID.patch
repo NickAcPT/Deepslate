@@ -6,10 +6,10 @@ Subject: [PATCH] Add game profile Display Unique ID
 Allows server-side disguising to be performed without leaking the player id directly.
 
 diff --git a/src/main/java/com/destroystokyo/paper/profile/CraftPlayerProfile.java b/src/main/java/com/destroystokyo/paper/profile/CraftPlayerProfile.java
-index ef6aab69daa7ab952408b573bff6c6996cbc349a..c5976569e0376d251a2bd97c90b04ab6f192f8dd 100644
+index 84551164b76bc8f064a3a0c030c3a1b47f567b6f..69783acff4d4e258ef07223644b2329cf49ba6f3 100644
 --- a/src/main/java/com/destroystokyo/paper/profile/CraftPlayerProfile.java
 +++ b/src/main/java/com/destroystokyo/paper/profile/CraftPlayerProfile.java
-@@ -35,6 +35,12 @@ public class CraftPlayerProfile implements PlayerProfile {
+@@ -33,6 +33,12 @@ public class CraftPlayerProfile implements PlayerProfile {
          this.profile = new GameProfile(id, name);
      }
  
@@ -22,7 +22,7 @@ index ef6aab69daa7ab952408b573bff6c6996cbc349a..c5976569e0376d251a2bd97c90b04ab6
      public CraftPlayerProfile(GameProfile profile) {
          Validate.notNull(profile, "GameProfile cannot be null!");
          this.profile = profile;
-@@ -71,6 +77,21 @@ public class CraftPlayerProfile implements PlayerProfile {
+@@ -69,6 +75,21 @@ public class CraftPlayerProfile implements PlayerProfile {
          return prev.getId();
      }
  
@@ -44,7 +44,7 @@ index ef6aab69daa7ab952408b573bff6c6996cbc349a..c5976569e0376d251a2bd97c90b04ab6
      @Nullable
      @Override
      public String getName() {
-@@ -126,7 +147,7 @@ public class CraftPlayerProfile implements PlayerProfile {
+@@ -124,7 +145,7 @@ public class CraftPlayerProfile implements PlayerProfile {
  
      @Override
      public CraftPlayerProfile clone() {
@@ -222,10 +222,10 @@ index 420cc7ab5f7245f31dd5b333eacf4e306fc6e7c1..628a60c6bd02ba371ae3bfb56ff9a880
              return this.latency;
          }
 diff --git a/src/main/java/net/minecraft/server/level/ServerPlayer.java b/src/main/java/net/minecraft/server/level/ServerPlayer.java
-index 434558824edd85809a747a436f2ad429e57a618c..7e35091719e9aff77e6dfb39b1b419a903746134 100644
+index 11786d686ed1734f8f41f6127b3499cb094ab528..ac82a466e5079acbccd1f59af8486bf22b562d45 100644
 --- a/src/main/java/net/minecraft/server/level/ServerPlayer.java
 +++ b/src/main/java/net/minecraft/server/level/ServerPlayer.java
-@@ -1863,6 +1863,7 @@ public class ServerPlayer extends Player {
+@@ -1891,6 +1891,7 @@ public class ServerPlayer extends Player {
  
      @Override
      public void sendMessage(Component message, UUID sender) {
@@ -234,7 +234,7 @@ index 434558824edd85809a747a436f2ad429e57a618c..7e35091719e9aff77e6dfb39b1b419a9
      }
  
 diff --git a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
-index 082deb251fa793561cc4366cc7b03d7b73bd02ba..641398e591e36b5c9bf91e74547530d2e39dff9d 100644
+index 69834b75a81491dcd3133d95cf81cc3cc91bb782..f2d48027f70c5acc584ee458579171e5a4a96ff1 100644
 --- a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 +++ b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 @@ -55,6 +55,7 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
@@ -245,7 +245,7 @@ index 082deb251fa793561cc4366cc7b03d7b73bd02ba..641398e591e36b5c9bf91e74547530d2
  import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
  import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
  import net.minecraft.network.protocol.game.ClientboundSetDefaultSpawnPositionPacket;
-@@ -2037,6 +2038,17 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -2031,6 +2032,17 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
      }
  
      public void send(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> listener) {

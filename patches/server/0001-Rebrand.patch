@@ -5,44 +5,47 @@ Subject: [PATCH] Rebrand
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index fba83a632abace5c2b280ea5919175f9574429f6..4f57d3f5488409e0adb384cf2784adb43c07b273 100644
+index cdae64a1f8a4096865fbaa246a0715f909cf5043..a869f665fa7c02a55760811640e24bd192b73bb8 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -30,7 +30,7 @@ repositories {
+@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
+ import io.papermc.paperweight.tasks.BaseTask
+ import io.papermc.paperweight.tasks.GenerateReobfMappings
+ import io.papermc.paperweight.tasks.PatchMappings
+-import io.papermc.paperweight.util.Constants
++import io.papermc.paperweight.util.constants.*
+ import io.papermc.paperweight.util.Git
+ import io.papermc.paperweight.util.cache
+ import io.papermc.paperweight.util.defaultOutput
+@@ -34,7 +34,7 @@ repositories {
  }
  
  dependencies {
 -    implementation(project(":Purpur-API")) // Purpur
 +    implementation(project(":Deepslate-API")) // Purpur
-     implementation("io.papermc.paper:paper-mojangapi:1.17-R0.1-SNAPSHOT") // Purpur
+     implementation("io.papermc.paper:paper-mojangapi:1.17.1-R0.1-SNAPSHOT") // Purpur
      // Paper start
      implementation("org.jline:jline-terminal-jansi:3.12.1")
-@@ -83,7 +83,7 @@ tasks.jar {
+@@ -87,7 +87,7 @@ tasks.jar {
          attributes(
              "Main-Class" to "org.bukkit.craftbukkit.Main",
              "Implementation-Title" to "CraftBukkit",
 -            "Implementation-Version" to "git-Purpur-$implementationVersion", // Purpur
 +            "Implementation-Version" to "git-Deepslate-$implementationVersion", // Deepslate
-             "Implementation-Vendor" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(Date()), // Paper
+             "Implementation-Vendor" to date, // Paper
              "Specification-Title" to "Bukkit",
              "Specification-Version" to project.version,
-@@ -133,7 +133,7 @@ tasks.shadowJar {
-     mergeServiceFiles()
-     transform(ModifiedLog4j2PluginsCacheFileTransformer::class.java)
- }
--
-+/* Deepslate start - do not include mappings as Paperweight is broken
- // Paper start - include reobf mappings in jar for stacktrace deobfuscation
- abstract class IncludeMappings : BaseTask() {
-     @get:InputFile
-@@ -171,6 +171,7 @@ tasks.reobfJar {
-     inputJar.set(includeMappings.flatMap { it.outputJar })
- }
- // Paper end - include reobf mappings in jar for stacktrace deobfuscation
-+Deepslate end - do not include mappings as Paperweight is broken - */
+@@ -118,8 +118,8 @@ val patchReobfMappings by tasks.registering<PatchMappings> {
+     inputMappings.set(generateReobfMappings.flatMap { it.reobfMappings })
+     patch.set(rootProject.layout.cache.resolve("paperweight/upstreams/paper/build-data/reobf-mappings-patch.tiny"))
  
- tasks.test {
-     exclude("org/bukkit/craftbukkit/inventory/ItemStack*Test.class")
+-    fromNamespace.set(Constants.DEOBF_NAMESPACE)
+-    toNamespace.set(Constants.SPIGOT_NAMESPACE)
++    fromNamespace.set(DEOBF_NAMESPACE)
++    toNamespace.set(SPIGOT_NAMESPACE)
+ 
+     outputMappings.set(layout.cache.resolve("paperweight/mappings/reobf-patched.tiny"))
+ }
 diff --git a/src/main/java/com/destroystokyo/paper/console/PaperConsole.java b/src/main/java/com/destroystokyo/paper/console/PaperConsole.java
 index 8c3c68465197fafc14849dc38a572e309931e2a2..403ac08928f1aa24f633dc5fb7126b7049266353 100644
 --- a/src/main/java/com/destroystokyo/paper/console/PaperConsole.java
@@ -69,24 +72,11 @@ index 43a88bc58716eef4040584944f52893c5a47699f..8808be0234448220e3ceb6306a4757f3
                  } catch (Throwable var5) {
                      if (outputStream != null) {
                          try {
-diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 108dadb24607ea42cf857879386c34c9bb72dbee..bdbc50706c6524e9801ee11a3d1300bba89c475b 100644
---- a/src/main/java/net/minecraft/server/MinecraftServer.java
-+++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -1729,7 +1729,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
- 
-     @DontObfuscate
-     public String getServerModName() {
--        return net.pl3x.purpur.PurpurConfig.serverModName; // Purpur // Tuinity // Paper // Spigot // CraftBukkit
-+        return "Deepslate"; // Deepslate // Purpur // Tuinity // Paper // Spigot // CraftBukkit
-     }
- 
-     public SystemReport fillSystemReport(SystemReport systemreport) {
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index e6c77e7ecfa03f948423a68df0266210d0a0274d..1014dac4c74a915d1bd9637fa6398bebd699444e 100644
+index 072532ca2c6868a29a019c4f79b44e4aaa02ffa7..ff33379411fa92911090f0d92d97bb2fc6bce7ee 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -230,7 +230,7 @@ import javax.annotation.Nullable; // Paper
+@@ -239,7 +239,7 @@ import javax.annotation.Nullable; // Paper
  import javax.annotation.Nonnull; // Paper
  
  public final class CraftServer implements Server {

@@ -5,7 +5,7 @@ Subject: [PATCH] Implement SlimeWorldManager NMS classes
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 4f57d3f5488409e0adb384cf2784adb43c07b273..68df235cebf60d3f6f217fb01a987b0bc8766a14 100644
+index a869f665fa7c02a55760811640e24bd192b73bb8..e8ea96659371b4366437d50b760cc4ad70c93860 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -1,3 +1,4 @@
@@ -13,7 +13,7 @@ index 4f57d3f5488409e0adb384cf2784adb43c07b273..68df235cebf60d3f6f217fb01a987b0b
  import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
  import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
  import io.papermc.paperweight.tasks.BaseTask
-@@ -27,6 +28,9 @@ repositories {
+@@ -31,6 +32,9 @@ repositories {
          }
      }
      // Paper end
@@ -23,7 +23,7 @@ index 4f57d3f5488409e0adb384cf2784adb43c07b273..68df235cebf60d3f6f217fb01a987b0b
  }
  
  dependencies {
-@@ -67,6 +71,18 @@ dependencies {
+@@ -70,6 +74,18 @@ dependencies {
  
      implementation("org.quiltmc:tiny-mappings-parser:0.3.0") // Paper - needed to read mappings for stacktrace deobfuscation
  
@@ -1187,10 +1187,10 @@ index 0000000000000000000000000000000000000000..7efe435f3e8ad1f6a7a7e3afe264e2a8
 +}
 \ No newline at end of file
 diff --git a/src/main/java/net/minecraft/server/level/ChunkMap.java b/src/main/java/net/minecraft/server/level/ChunkMap.java
-index 2d2da8f19c8845c5cfb4625ef7fed26212420eae..9c2095c67628ad3eba5b614359eb48f4fb4ca743 100644
+index 55a57e474ed3035f3d070c7be2c3bdb7d03632b8..da3f375d7f639f014c4cc9e9e204974b42826f0f 100644
 --- a/src/main/java/net/minecraft/server/level/ChunkMap.java
 +++ b/src/main/java/net/minecraft/server/level/ChunkMap.java
-@@ -1353,10 +1353,11 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
+@@ -1439,10 +1439,11 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
              return !chunkstatus.isOrAfter(ChunkStatus.FULL) ? ChunkHolder.UNLOADED_CHUNK : either.mapLeft((ichunkaccess) -> {
              try (Timing ignored = level.timings.chunkPostLoad.startTimingIfSync()) { // Paper
                  ChunkPos chunkcoordintpair = playerchunk.getPos();
@@ -1204,7 +1204,7 @@ index 2d2da8f19c8845c5cfb4625ef7fed26212420eae..9c2095c67628ad3eba5b614359eb48f4
                      chunk = ((ImposterProtoChunk) protochunk).getWrapped();
                  } else {
                      chunk = new LevelChunk(this.level, protochunk, (chunk1) -> {
-@@ -1364,6 +1365,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
+@@ -1450,6 +1451,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
                      });
                      playerchunk.replaceProtoChunk(new ImposterProtoChunk(chunk));
                  }
@@ -1213,10 +1213,10 @@ index 2d2da8f19c8845c5cfb4625ef7fed26212420eae..9c2095c67628ad3eba5b614359eb48f4
                  chunk.setFullStatus(() -> {
                      return ChunkHolder.getFullChunkStatus(playerchunk.getTicketLevel());
 diff --git a/src/main/java/net/minecraft/server/level/ServerLevel.java b/src/main/java/net/minecraft/server/level/ServerLevel.java
-index c4d583c21cd95e02ff04dfa7cdd3ed1a001ee10a..c2a9a23e0d75e777038159a344027ca59c989bbc 100644
+index fed85a378cb1cd80ff8ed66017340f8106d9cb34..3385f873f2cf69e3e20f66c1f953aba1af4e9fdc 100644
 --- a/src/main/java/net/minecraft/server/level/ServerLevel.java
 +++ b/src/main/java/net/minecraft/server/level/ServerLevel.java
-@@ -198,7 +198,7 @@ public class ServerLevel extends net.minecraft.world.level.Level implements Worl
+@@ -192,7 +192,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
      private boolean handlingTick;
      private final List<CustomSpawner> customSpawners;
      @Nullable
@@ -1225,7 +1225,7 @@ index c4d583c21cd95e02ff04dfa7cdd3ed1a001ee10a..c2a9a23e0d75e777038159a344027ca5
      final Int2ObjectMap<EnderDragonPart> dragonParts;
      private final StructureFeatureManager structureFeatureManager;
      private final boolean tickTime;
-@@ -1345,7 +1345,7 @@ public class ServerLevel extends net.minecraft.world.level.Level implements Worl
+@@ -1321,7 +1321,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
          // CraftBukkit end
      }
  
@@ -1234,7 +1234,7 @@ index c4d583c21cd95e02ff04dfa7cdd3ed1a001ee10a..c2a9a23e0d75e777038159a344027ca5
          if (this.dragonFight != null) {
              this.serverLevelData.setEndDragonFightData(this.dragonFight.saveData()); // CraftBukkit
          }
-@@ -2294,6 +2294,11 @@ public class ServerLevel extends net.minecraft.world.level.Level implements Worl
+@@ -2285,6 +2285,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
      public EndDragonFight dragonFight() {
          return this.dragonFight;
      }
@@ -1247,10 +1247,10 @@ index c4d583c21cd95e02ff04dfa7cdd3ed1a001ee10a..c2a9a23e0d75e777038159a344027ca5
      @Override
      public Stream<? extends StructureStart<?>> startsForFeature(SectionPos pos, StructureFeature<?> feature) {
 diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
-index bfac7888f71232ac095e2615bddf05d71384f359..614273e180e51c0c99c68a781356288f079f44f6 100644
+index 42c9952ee868fa54d9b6f2db8e08e3bc2a9b18de..18607ae6e530881bfba2b37c24c191c042b83ca0 100644
 --- a/src/main/java/net/minecraft/world/level/Level.java
 +++ b/src/main/java/net/minecraft/world/level/Level.java
-@@ -513,7 +513,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
+@@ -519,7 +519,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
      }
  
      @Override
