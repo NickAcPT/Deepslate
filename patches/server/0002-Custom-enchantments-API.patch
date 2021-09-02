@@ -244,10 +244,10 @@ index a3ac6bebcef7b1e1f9c3ebe525656a15e13f9be8..2d1be1a1f37a0809368458522d34e3e0
          }).then(Commands.argument("level", IntegerArgumentType.integer(0)).executes((context) -> {
              return enchant(context.getSource(), EntityArgument.getEntities(context, "targets"), ItemEnchantmentArgument.getEnchantment(context, "enchantment"), IntegerArgumentType.getInteger(context, "level"));
 diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-index d6502173bebba1a1c62deea2e14b40d7942736f6..78cfb375554203351912f0b2f9c64064950f8eeb 100644
+index 77eb1b3bf77d496fb0675fbb681efb0df32fb5c4..fa645888f793c41d42eefcf3e768d99c6806db59 100644
 --- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-@@ -350,6 +350,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
+@@ -351,6 +351,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
              }
  
              net.pl3x.purpur.task.BossBarTask.startAll(); // Purpur
@@ -256,7 +256,7 @@ index d6502173bebba1a1c62deea2e14b40d7942736f6..78cfb375554203351912f0b2f9c64064
              return true;
          }
 diff --git a/src/main/java/net/minecraft/server/level/ServerPlayerGameMode.java b/src/main/java/net/minecraft/server/level/ServerPlayerGameMode.java
-index 38323c95dc36e5ead294670ce120114492de37d5..69531c096fbd5ffef27bc432d4d7a7f6231f29be 100644
+index 645c76e6dd50d915263db576650c7a62a238d5ea..ac7d74ac91699e24b96234b6493486cd79ec370c 100644
 --- a/src/main/java/net/minecraft/server/level/ServerPlayerGameMode.java
 +++ b/src/main/java/net/minecraft/server/level/ServerPlayerGameMode.java
 @@ -401,6 +401,10 @@ public class ServerPlayerGameMode {
@@ -271,10 +271,10 @@ index 38323c95dc36e5ead294670ce120114492de37d5..69531c096fbd5ffef27bc432d4d7a7f6
                  if (isSwordNoBreak) {
                      return false;
 diff --git a/src/main/java/net/minecraft/world/item/ItemStack.java b/src/main/java/net/minecraft/world/item/ItemStack.java
-index af0a195fb82eb7872bc6206d39c2963bd468ccd6..5a344e1b60dde80a421a8f7fe292f0c223d12fc4 100644
+index d8df4457c28225508d9cb53ed6ea12d2f58648b8..ee6f889de2d3aa9ed1460bc1832d7278abd488a4 100644
 --- a/src/main/java/net/minecraft/world/item/ItemStack.java
 +++ b/src/main/java/net/minecraft/world/item/ItemStack.java
-@@ -1054,11 +1054,11 @@ public final class ItemStack {
+@@ -1062,11 +1062,11 @@ public final class ItemStack {
          return list;
      }
  
@@ -332,10 +332,10 @@ index 955e482e4bc83f2b777cd2e4254c40beef08853b..d4b09879ae7210cf8ace5d6a6f2916d6
 +    //Deepslate end
  }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index ff33379411fa92911090f0d92d97bb2fc6bce7ee..c9db8664482c7ebea34f3b3e984bedde3d057084 100644
+index 248b496665a545ba65dc2f5f7eab58d0636d03ed..36838fff714cbad8c3ec8db20ab4e674c7f9c98f 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -2643,4 +2643,13 @@ public final class CraftServer implements Server {
+@@ -2713,4 +2713,13 @@ public final class CraftServer implements Server {
          return getServer().lagging;
      }
      // Purpur end

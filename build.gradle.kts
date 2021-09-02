@@ -1,7 +1,7 @@
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "7.0.0" apply false
-    id("io.papermc.paperweight.patcher") version "1.1.9-SNAPSHOT"
+    id("io.papermc.paperweight.patcher") version "1.1.11"
 }
 
 repositories {
@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    remapper("org.quiltmc:tiny-remapper:0.4.1")
+    remapper("org.quiltmc:tiny-remapper:0.4.3:fat")
     paperclip("io.papermc:paperclip:2.0.1")
 }
 
@@ -61,6 +61,9 @@ paperweight {
         withStandardPatcher {
             baseName("Purpur")
 
+            remapRepo.set("https://maven.quiltmc.org/repository/release/")
+            decompileRepo.set("https://files.minecraftforge.net/maven/")
+            
             apiOutputDir.set(layout.projectDirectory.dir("Deepslate-API"))
             serverOutputDir.set(layout.projectDirectory.dir("Deepslate-Server"))
         }

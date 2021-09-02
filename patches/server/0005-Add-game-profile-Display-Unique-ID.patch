@@ -222,10 +222,10 @@ index 420cc7ab5f7245f31dd5b333eacf4e306fc6e7c1..628a60c6bd02ba371ae3bfb56ff9a880
              return this.latency;
          }
 diff --git a/src/main/java/net/minecraft/server/level/ServerPlayer.java b/src/main/java/net/minecraft/server/level/ServerPlayer.java
-index 11786d686ed1734f8f41f6127b3499cb094ab528..ac82a466e5079acbccd1f59af8486bf22b562d45 100644
+index 6d0257c35081991e925d85348aff168c6ca58ad7..3a006d9d691ccf4d6ecfbd4da210c5aafa12687a 100644
 --- a/src/main/java/net/minecraft/server/level/ServerPlayer.java
 +++ b/src/main/java/net/minecraft/server/level/ServerPlayer.java
-@@ -1891,6 +1891,7 @@ public class ServerPlayer extends Player {
+@@ -1898,6 +1898,7 @@ public class ServerPlayer extends Player {
  
      @Override
      public void sendMessage(Component message, UUID sender) {
@@ -234,7 +234,7 @@ index 11786d686ed1734f8f41f6127b3499cb094ab528..ac82a466e5079acbccd1f59af8486bf2
      }
  
 diff --git a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
-index 69834b75a81491dcd3133d95cf81cc3cc91bb782..f2d48027f70c5acc584ee458579171e5a4a96ff1 100644
+index 86ed3f8491ea7ad117ac36be0d4bf304489c79f1..31b9461fc53607677c9b7dfa9760cb84ded6d8df 100644
 --- a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 +++ b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 @@ -55,6 +55,7 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
@@ -245,7 +245,7 @@ index 69834b75a81491dcd3133d95cf81cc3cc91bb782..f2d48027f70c5acc584ee458579171e5
  import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
  import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
  import net.minecraft.network.protocol.game.ClientboundSetDefaultSpawnPositionPacket;
-@@ -2031,6 +2032,17 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
+@@ -2038,6 +2039,17 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Ser
      }
  
      public void send(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> listener) {

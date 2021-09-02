@@ -6,10 +6,10 @@ Subject: [PATCH] Custom enchantments API
 
 diff --git a/src/main/java/io/github/nickacpt/deepslate/enchantments/CustomEnchantment.java b/src/main/java/io/github/nickacpt/deepslate/enchantments/CustomEnchantment.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..041f69ccbcaea70dcfe29d8dfb2415a29c208738
+index 0000000000000000000000000000000000000000..1e90ba10a567ca4d449866ec556999fe842080e7
 --- /dev/null
 +++ b/src/main/java/io/github/nickacpt/deepslate/enchantments/CustomEnchantment.java
-@@ -0,0 +1,95 @@
+@@ -0,0 +1,100 @@
 +package io.github.nickacpt.deepslate.enchantments;
 +
 +import java.util.EnumSet;
@@ -32,7 +32,7 @@ index 0000000000000000000000000000000000000000..041f69ccbcaea70dcfe29d8dfb2415a2
 + */
 +public abstract class CustomEnchantment extends Enchantment implements Keyed {
 +
-+    protected CustomEnchantment(NamespacedKey key) {
++    protected CustomEnchantment(@NotNull NamespacedKey key) {
 +        super(key);
 +    }
 +
@@ -104,14 +104,19 @@ index 0000000000000000000000000000000000000000..041f69ccbcaea70dcfe29d8dfb2415a2
 +    }
 +
 +    public void onBlockBreak(@NotNull BlockBreakEvent event, int level, @NotNull Player player, @NotNull ItemStack itemStack) {}
++
++    @Override
++    public @NotNull String translationKey() {
++        return getName();
++    }
 +}
 \ No newline at end of file
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
-index 34902835cd4e030902feb568a2315c7f5d60f0eb..8459751e3d15318216e92f10942be4a4861f38b1 100644
+index 390a0d09b78e46cfebe78bfa3d1dd73aedca8256..070588251cfd203db4ab469394ecf4fc704a1da4 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
-@@ -2081,4 +2081,14 @@ public final class Bukkit {
-         return server.isLagging();
+@@ -2102,4 +2102,14 @@ public final class Bukkit {
+         server.removeFuel(material);
      }
      // Purpur end
 +
@@ -126,12 +131,12 @@ index 34902835cd4e030902feb568a2315c7f5d60f0eb..8459751e3d15318216e92f10942be4a4
 +    // Deepslate end
  }
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 061ce81a781ac1c577927972b862f48a453ba400..98d0f3a97a3230bf42c095a668232fe650e9ded2 100644
+index 88767865cc2dce0e341eef0f53323af6f95fb841..868f7dd5fafd95306fd7bd8a5981b46065197cde 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
-@@ -1826,4 +1826,13 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
+@@ -1835,4 +1835,13 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
       */
-     boolean isLagging();
+     public void removeFuel(@NotNull Material material);
      // Purpur end
 +
 +    // Deepslate start
@@ -144,10 +149,10 @@ index 061ce81a781ac1c577927972b862f48a453ba400..98d0f3a97a3230bf42c095a668232fe6
 +    // Deepslate end
  }
 diff --git a/src/main/java/org/bukkit/enchantments/Enchantment.java b/src/main/java/org/bukkit/enchantments/Enchantment.java
-index 799813410f40589ba1d7d530a47d87f609764705..e44f8559dda77b4f59ec940b3217a27f18bf2db9 100644
+index 1e1c5a9d9a769018c4604e6e44fc5ed2312981e9..f835130f9ed452446e1ab01125999a8f64d9f03c 100644
 --- a/src/main/java/org/bukkit/enchantments/Enchantment.java
 +++ b/src/main/java/org/bukkit/enchantments/Enchantment.java
-@@ -383,7 +383,7 @@ public abstract class Enchantment implements Keyed {
+@@ -379,7 +379,7 @@ public abstract class Enchantment implements Keyed, net.kyori.adventure.translat
      public static void registerEnchantment(@NotNull Enchantment enchantment) {
          if (byKey.containsKey(enchantment.key) || byName.containsKey(enchantment.getName())) {
              throw new IllegalArgumentException("Cannot set already-set enchantment");

@@ -5,15 +5,15 @@ Subject: [PATCH] Port SlimeWorldManager patches
 
 
 diff --git a/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java b/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
-index 81292899918c4dc880661ee628384cb840a6244f..ebdd90884d1c5645bcae2d8766add8c9aa2f6fcb 100644
+index 70aa79c0bfde6aea8031eeb69124344ab3af5c27..390065e522ed33a492f0be50fa019d13c6f51c2e 100644
 --- a/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
 +++ b/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
-@@ -51,7 +51,7 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
+@@ -53,7 +53,7 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
      }
  
      PluginClassLoader(@NotNull final JavaPluginLoader loader, @Nullable final ClassLoader parent, @NotNull final PluginDescriptionFile description, @NotNull final File dataFolder, @NotNull final File file, @Nullable ClassLoader libraryLoader) throws IOException, InvalidPluginException, MalformedURLException {
--        super(new URL[] {file.toURI().toURL()}, parent);
-+        super(description.getName().equals("SlimeWorldManager") ? new URL[] {file.toURI().toURL(), JavaPluginLoader.class.getProtectionDomain().getCodeSource().getLocation()} : new URL[] {file.toURI().toURL()}, parent); // Deepslate - Add server as library to SlimeWorldManager
+-        super(file.getName(), new URL[] {file.toURI().toURL()}, parent); // Paper - rewrite LogEvents to contain source jar info
++        super(file.getName(), description.getName().equals("SlimeWorldManager") ? new URL[] {file.toURI().toURL(), JavaPluginLoader.class.getProtectionDomain().getCodeSource().getLocation()} : new URL[] {file.toURI().toURL()}, parent); // Paper - rewrite LogEvents to contain source jar info // Deepslate - Add server as library to SlimeWorldManager
          Validate.notNull(loader, "Loader cannot be null");
  
          this.loader = loader;

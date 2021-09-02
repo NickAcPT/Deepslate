@@ -5,47 +5,34 @@ Subject: [PATCH] Rebrand
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index cdae64a1f8a4096865fbaa246a0715f909cf5043..a869f665fa7c02a55760811640e24bd192b73bb8 100644
+index 399641413d38f1a27165a0cf60b6c7c781cf1488..68343a1a524a9cde636a2a48ad6096da807b4f7c 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
- import io.papermc.paperweight.tasks.BaseTask
- import io.papermc.paperweight.tasks.GenerateReobfMappings
- import io.papermc.paperweight.tasks.PatchMappings
--import io.papermc.paperweight.util.Constants
-+import io.papermc.paperweight.util.constants.*
- import io.papermc.paperweight.util.Git
- import io.papermc.paperweight.util.cache
- import io.papermc.paperweight.util.defaultOutput
-@@ -34,7 +34,7 @@ repositories {
+@@ -32,7 +32,7 @@ repositories {
  }
  
  dependencies {
--    implementation(project(":Purpur-API")) // Purpur
-+    implementation(project(":Deepslate-API")) // Purpur
-     implementation("io.papermc.paper:paper-mojangapi:1.17.1-R0.1-SNAPSHOT") // Purpur
+-    implementation(project(":Purpur-API")) // Airplane // Purpur
++    implementation(project(":Deepslate-API")) // Airplane // Purpur // Deepslate
+     implementation("io.papermc.paper:paper-mojangapi:1.17.1-R0.1-SNAPSHOT") // Airplane
      // Paper start
      implementation("org.jline:jline-terminal-jansi:3.12.1")
-@@ -87,7 +87,7 @@ tasks.jar {
+@@ -90,7 +90,7 @@ tasks.jar {
          attributes(
              "Main-Class" to "org.bukkit.craftbukkit.Main",
              "Implementation-Title" to "CraftBukkit",
--            "Implementation-Version" to "git-Purpur-$implementationVersion", // Purpur
-+            "Implementation-Version" to "git-Deepslate-$implementationVersion", // Deepslate
+-            "Implementation-Version" to "git-Purpur-$implementationVersion", // Airplane // Purpur
++            "Implementation-Version" to "git-Deepslate-$implementationVersion", // Airplane // Purpur // Deepslate
              "Implementation-Vendor" to date, // Paper
              "Specification-Title" to "Bukkit",
              "Specification-Version" to project.version,
-@@ -118,8 +118,8 @@ val patchReobfMappings by tasks.registering<PatchMappings> {
-     inputMappings.set(generateReobfMappings.flatMap { it.reobfMappings })
-     patch.set(rootProject.layout.cache.resolve("paperweight/upstreams/paper/build-data/reobf-mappings-patch.tiny"))
- 
--    fromNamespace.set(Constants.DEOBF_NAMESPACE)
--    toNamespace.set(Constants.SPIGOT_NAMESPACE)
-+    fromNamespace.set(DEOBF_NAMESPACE)
-+    toNamespace.set(SPIGOT_NAMESPACE)
- 
-     outputMappings.set(layout.cache.resolve("paperweight/mappings/reobf-patched.tiny"))
- }
+@@ -277,4 +277,4 @@ class ModifiedLog4j2PluginsCacheFileTransformer : Transformer by Log4j2PluginsCa
+     override fun canTransformResource(element: FileTreeElement): Boolean {
+         return PLUGIN_CACHE_FILE == element.name || element.name == "Log4j2Plugins.dat"
+     }
+-}
++}
+\ No newline at end of file
 diff --git a/src/main/java/com/destroystokyo/paper/console/PaperConsole.java b/src/main/java/com/destroystokyo/paper/console/PaperConsole.java
 index 8c3c68465197fafc14849dc38a572e309931e2a2..403ac08928f1aa24f633dc5fb7126b7049266353 100644
 --- a/src/main/java/com/destroystokyo/paper/console/PaperConsole.java
@@ -60,41 +47,41 @@ index 8c3c68465197fafc14849dc38a572e309931e2a2..403ac08928f1aa24f633dc5fb7126b70
                  .completer(new ConsoleCommandCompleter(this.server))
                  .option(LineReader.Option.COMPLETE_IN_WORD, true);
 diff --git a/src/main/java/net/minecraft/server/Eula.java b/src/main/java/net/minecraft/server/Eula.java
-index 43a88bc58716eef4040584944f52893c5a47699f..8808be0234448220e3ceb6306a4757f33f3fd0a4 100644
+index a1d5c0f8fe2adb2ee56f3217e089211ec7c61eb0..bcad8b349519a6d3fd9d7538a4431ef56e0c5687 100644
 --- a/src/main/java/net/minecraft/server/Eula.java
 +++ b/src/main/java/net/minecraft/server/Eula.java
 @@ -64,7 +64,7 @@ public class Eula {
                  try {
                      Properties properties = new Properties();
                      properties.setProperty("eula", "false");
--                    properties.store(outputStream, "By changing the setting below to TRUE you are indicating your agreement to our EULA (https://account.mojang.com/documents/minecraft_eula).\nYou also agree that tacos are tasty, and the best food in the world.");  // Paper - fix lag; // Tuinity - Tacos are disgusting // Purpur - no they're not
-+                    properties.store(outputStream, "By changing the setting below to TRUE you are indicating your agreement to our EULA (https://account.mojang.com/documents/minecraft_eula).");  // Paper - fix lag; // Tuinity - Tacos are disgusting // Purpur - no they're not // Deepslate - yes they are
+-                    properties.store(outputStream, "By changing the setting below to TRUE you are indicating your agreement to our EULA (https://account.mojang.com/documents/minecraft_eula).\nYou also agree that tacos are tasty, and the best food in the world.");  // Paper - fix lag;
++                    properties.store(outputStream, "By changing the setting below to TRUE you are indicating your agreement to our EULA (https://account.mojang.com/documents/minecraft_eula).");  // Paper - fix lag; // Deepslate - Tacos are disgusting
                  } catch (Throwable var5) {
                      if (outputStream != null) {
                          try {
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 072532ca2c6868a29a019c4f79b44e4aaa02ffa7..ff33379411fa92911090f0d92d97bb2fc6bce7ee 100644
+index bd3b975481ce780199d6ec60bddaaa263714d289..248b496665a545ba65dc2f5f7eab58d0636d03ed 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -239,7 +239,7 @@ import javax.annotation.Nullable; // Paper
+@@ -246,7 +246,7 @@ import javax.annotation.Nullable; // Paper
  import javax.annotation.Nonnull; // Paper
  
  public final class CraftServer implements Server {
--    private final String serverName = "Purpur"; // Paper // Tuinity // Purpur
-+    private final String serverName = "Deepslate"; // Paper // Tuinity // Purpur // Deepslate
+-    private final String serverName = "Purpur"; // Paper // Airplane // Purpur
++    private final String serverName = "Deepslate"; // Paper // Airplane // Purpur // Deepslate
      private final String serverVersion;
      private final String bukkitVersion = Versioning.getBukkitVersion();
      private final Logger logger = Logger.getLogger("Minecraft");
 diff --git a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
-index 13b98439320ac1401a920c01d7cf5a4b3a23deff..8bb42bf56e1de3f749c48ef9565567e8b56d69f0 100644
+index e7d740e191c5ac408ba1fa493e9367dd52900a02..720d3f5295f571437304f04d201ff514bd3bdedf 100644
 --- a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
 +++ b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
 @@ -11,7 +11,7 @@ public final class Versioning {
      public static String getBukkitVersion() {
          String result = "Unknown-Version";
  
--        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/net.pl3x.purpur/purpur-api/pom.properties"); // Tuinity // Purpur
-+        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/io.github.nickacpt.deepslate/deepslate-api/pom.properties"); // Tuinity // Purpur // Deepslate
+-        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/net.pl3x.purpur/purpur-api/pom.properties"); // Airplane // Purpur
++        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/io.github.nickacpt.deepslate/deepslate-api/pom.properties"); // Airplane // Purpur // Deepslate
          Properties properties = new Properties();
  
          if (stream != null) {

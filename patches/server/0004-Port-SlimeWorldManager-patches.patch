@@ -5,10 +5,10 @@ Subject: [PATCH] Port SlimeWorldManager patches
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index efddedd3fdec7fc146be5a572ce86e58d3c7c1e4..4283af9f10417494caf45e001c94944f6eaca21e 100644
+index 928c759d30db2d35ea786b3fe0738c42ef3fed80..1096b42c999846bd8b160d7a296876eaf99b9c9d 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -543,12 +543,13 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -545,12 +545,13 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
              overworldData = new PrimaryLevelData(worldsettings, generatorsettings, Lifecycle.stable());
          }
  
@@ -23,7 +23,7 @@ index efddedd3fdec7fc146be5a572ce86e58d3c7c1e4..4283af9f10417494caf45e001c94944f
              int dimension = 0;
  
              if (dimensionKey == LevelStem.NETHER) {
-@@ -567,6 +568,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -569,6 +570,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
                  dimension = -999;
              }
  
@@ -32,23 +32,23 @@ index efddedd3fdec7fc146be5a572ce86e58d3c7c1e4..4283af9f10417494caf45e001c94944f
              String worldType = (dimension == -999) ? dimensionKey.location().getNamespace() + "_" + dimensionKey.location().getPath() : org.bukkit.World.Environment.getEnvironment(dimension).toString().toLowerCase();
              String name = (dimensionKey == LevelStem.OVERWORLD) ? s : s + "_" + worldType;
              if (dimension != 0) {
-@@ -668,6 +671,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -683,6 +686,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
  
                  ChunkProgressListener worldloadlistener = this.progressListenerFactory.create(11);
  
 +                if (world == null) // Deepslate - Fetch world from SWM
-                 world = new ServerLevel(this, this.executor, worldSession, iworlddataserver, worldKey, dimensionmanager, worldloadlistener, chunkgenerator, flag, j, list, true, org.bukkit.World.Environment.getEnvironment(dimension), gen);
+                 world = new ServerLevel(this, this.executor, worldSession, iworlddataserver, worldKey, dimensionmanager, worldloadlistener, chunkgenerator, flag, j, list, true, org.bukkit.World.Environment.getEnvironment(dimension), gen, biomeProvider);
                  DimensionDataStorage worldpersistentdata = world.getDataStorage();
                  this.readScoreboard(worldpersistentdata);
-@@ -675,6 +679,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -690,6 +694,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
                  this.commandStorage = new CommandStorage(worldpersistentdata);
              } else {
                  ChunkProgressListener worldloadlistener = this.progressListenerFactory.create(11);
 +                if (world == null) // Deepslate - Fetch world from SWM
-                 world = new ServerLevel(this, this.executor, worldSession, iworlddataserver, worldKey, dimensionmanager, worldloadlistener, chunkgenerator, flag, j, ImmutableList.of(), true, org.bukkit.World.Environment.getEnvironment(dimension), gen);
+                 world = new ServerLevel(this, this.executor, worldSession, iworlddataserver, worldKey, dimensionmanager, worldloadlistener, chunkgenerator, flag, j, ImmutableList.of(), true, org.bukkit.World.Environment.getEnvironment(dimension), gen, biomeProvider);
              }
  
-@@ -936,6 +941,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -951,6 +956,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
      }
  
      public GameType getDefaultGameType() {
@@ -60,10 +60,10 @@ index efddedd3fdec7fc146be5a572ce86e58d3c7c1e4..4283af9f10417494caf45e001c94944f
      }
  
 diff --git a/src/main/java/net/minecraft/server/level/ChunkMap.java b/src/main/java/net/minecraft/server/level/ChunkMap.java
-index da3f375d7f639f014c4cc9e9e204974b42826f0f..a7e05eea3fa0c8e3282e0bea40545d3928b3b270 100644
+index f39bcd374dca049d4609ffbf7188a747ccbaca7c..850930954e7fdb99a16b119dccfee32c39d25fc3 100644
 --- a/src/main/java/net/minecraft/server/level/ChunkMap.java
 +++ b/src/main/java/net/minecraft/server/level/ChunkMap.java
-@@ -1255,6 +1255,12 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
+@@ -1205,6 +1205,12 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
      }
  
      private CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> scheduleChunkLoad(ChunkPos pos) {
@@ -76,7 +76,7 @@ index da3f375d7f639f014c4cc9e9e204974b42826f0f..a7e05eea3fa0c8e3282e0bea40545d39
          // Paper start - Async chunk io
          final java.util.function.BiFunction<ChunkSerializer.InProgressChunkHolder, Throwable, Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> syncLoadComplete = (chunkHolder, ioThrowable) -> {
              try (Timing ignored = this.level.timings.chunkLoad.startTimingIfSync()) { // Paper
-@@ -1554,6 +1560,11 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
+@@ -1504,6 +1510,11 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
      }
  
      public boolean save(ChunkAccess chunk) {
@@ -122,10 +122,10 @@ index 5d60a4ebbd039077c4d2458ac8d8110097eb74a3..d595e6c15cd0791d7174ffc222d6fed7
              CompoundTag compoundTag = new CompoundTag();
              compoundTag.put("data", this.save(new CompoundTag()));
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index c9db8664482c7ebea34f3b3e984bedde3d057084..39c60af39092f7f4d9e2e03867461b23ab385a5d 100644
+index 36838fff714cbad8c3ec8db20ab4e674c7f9c98f..ff9f8d77cf846ab49212fdafc28c532565452ded 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -1285,6 +1285,11 @@ public final class CraftServer implements Server {
+@@ -1314,6 +1314,11 @@ public final class CraftServer implements Server {
      // Paper end
  
      public void addWorld(World world) {

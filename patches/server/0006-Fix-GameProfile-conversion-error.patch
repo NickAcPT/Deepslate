@@ -5,12 +5,12 @@ Subject: [PATCH] Fix GameProfile conversion error
 
 
 diff --git a/src/main/java/net/minecraft/world/level/block/entity/SkullBlockEntity.java b/src/main/java/net/minecraft/world/level/block/entity/SkullBlockEntity.java
-index 6381544b0038de9a09c01238638e4e127e4eddc6..2f3606b08ff50254ff2fe1dd92ab43c3c0a0fc3d 100644
+index f61c313195c3d16d996721b2f8cd0d9a10ce1aaf..d52a7539f95214ab715871777a0b36c3d8c8ae52 100644
 --- a/src/main/java/net/minecraft/world/level/block/entity/SkullBlockEntity.java
 +++ b/src/main/java/net/minecraft/world/level/block/entity/SkullBlockEntity.java
 @@ -152,6 +152,7 @@ public class SkullBlockEntity extends BlockEntity {
              profileCache.getAsync(owner.getName(), (profile) -> {
-                 Util.backgroundExecutor().execute(() -> {
+                 Util.PROFILE_EXECUTOR.execute(() -> { // Paper - not a good idea to use BLOCKING OPERATIONS on the worldgen executor
                      Util.ifElse(profile, (profilex) -> {
 +                        if (profilex == null) return; // Deepslate - fix conversion error
                          Property property = Iterables.getFirst(profilex.getProperties().get("textures"), (Property)null);
